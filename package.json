@@ -1,0 +1,20 @@
+{
+  "name": "keiri-core",
+  "version": "1.0.0",
+  "description": "日本の給与・税・社会保険の計算ロジック（DOM非依存の純関数）。公式の計算例・保険料額表と1銭まで照合したテスト付き。",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://keiri-tools.com/",
+  "scripts": {
+    "test": "node test/shaho_oracle.test.mjs && node test/gensen.test.mjs"
+  },
+  "keywords": [
+    "japan",
+    "payroll",
+    "tax",
+    "social-insurance",
+    "源泉徴収",
+    "社会保険料",
+    "手取り"
+  ]
+}

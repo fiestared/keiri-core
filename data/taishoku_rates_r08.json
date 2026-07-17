@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "source": "所得税法89条1項（税率の表）・30条（退職所得）／地方税法50条の4（道府県民税4%）・328条の3（市町村民税6%）・20条の4の2（端数計算）／東日本大震災復興財確法13条（復興特別所得税2.1%）",
+    "year": "令和8年",
+    "label": "2026年7月14日現在の法令（所得税法は令和8年4月1日施行版）",
+    "applies_from": "2026-04-01",
+    "url": "https://laws.e-gov.go.jp/law/340AC0000000033",
+    "checked": "2026-07-14",
+    "note": "退職所得の税額は『毎年改定される額』を持たない（雇用保険の基本手当とはここが違う）。金額が動くのは税制改正のときだけ。ただし復興特別所得税は平成25年〜令和19年分までの時限措置なので、2038年以降は 2.1% を外すこと。",
+    "fukko_until": "2037-12-31"
+  },
+
+  "kinzoku_20ika_per_year": 400000,
+  "kinzoku_20cho_base": 8000000,
+  "kinzoku_20cho_per_year": 700000,
+  "kojo_min": 800000,
+  "shogai_add": 1000000,
+
+  "tanki_half_limit": 3000000,
+  "tanki_half_of_limit": 1500000,
+
+  "brackets": [
+    { "upto": 1950000, "rate_pct": 5 },
+    { "upto": 3300000, "rate_pct": 10 },
+    { "upto": 6950000, "rate_pct": 20 },
+    { "upto": 9000000, "rate_pct": 23 },
+    { "upto": 18000000, "rate_pct": 33 },
+    { "upto": 40000000, "rate_pct": 40 },
+    { "upto": null, "rate_pct": 45 }
+  ],
+
+  "fukko_pct": 2.1,
+  "mishinkoku_pct": 20.42,
+
+  "juminzei_shichoson_pct": 6,
+  "juminzei_dofuken_pct": 4
+}

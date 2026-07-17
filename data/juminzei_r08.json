@@ -1,0 +1,276 @@
+{
+  "_meta": {
+    "year": "令和8年分",
+    "label": "令和8年分（2026年）の所得に基づく住民税所得割・ふるさと納税の限度額",
+    "applies_from": "2026-01-01",
+    "checked": "2026-07-14",
+    "source": "地方税法（e-Gov法令API v2）314条の2 所得控除／314条の3・35条 所得割の税率／314条の6・37条 調整控除／314条の7・37条の2 寄附金税額控除／同法附則5条の6 特例控除額の割合の読替え／20条の4の2 端数計算。所得税法28条2〜4項・別表第五 給与所得／86条 基礎控除。租税特別措置法41条の16の2 基礎控除の特例",
+    "url": "https://laws.e-gov.go.jp/law/325AC0000000226",
+    "note": "★この表の『特例控除額の割合』(tokurei_ritsu)は、地方税法本則37条の2第11項の表ではなく、附則5条の6による読替え後の値。本則は85/80/70/67/57/50/45%だが、復興特別所得税(×1.021)を織り込んだ84.895/79.79/69.58/66.517/56.307/49.16/44.055%に読み替えられる（平成26年度〜令和20年度）。本則だけを読むと限度額を過大に出す。",
+    "next_review": "2027-01-01",
+    "next_review_reason": "★令和9年（2027年）の寄附分から、特例控除額に193万円（給与収入1億円相当）の定額上限が新設される（総務省 自治税務局市町村税課『特例控除額の定額上限の設定』令和8年3月24日 https://www.soumu.go.jp/main_content/001070694.pdf）。2026年中の寄附には適用されない。／さらに、附則5条の6の読替えは『令和20年度まで』（復興特別所得税の期限に対応）で、令和21年度以降は本則の85/80/70…に戻る。",
+    "kiso_kojo_caution": "所得税の基礎控除の上乗せ（措置法41条の16の2第1項1号の30万円/10万円/5万円）は令和7年分・令和8年分限りの特例。令和9年分以後は合計所得132万円以下の+37万円だけが残るので、shotokuzei_kiso_kojo を差し替えること。住民税の基礎控除43万円と給与所得控除は令和7年分から変わっていない（＝令和7年分と令和8年分はこのファイルで共通に扱える）。"
+  },
+
+  "kyuyo_shotoku": {
+    "_source": "所得税法28条2項・3項（給与所得控除額）／28条4項・別表第五（収入660万円未満は表による）",
+    "_hyo5_note": "★収入660万円未満は『別表第五』で求める（速算式ではない）。表は収入を4,000円刻みの区分に切り、その区分の下限額で控除を計算している。別表第五の1,175行すべてでこの規則が成り立つことを条文の表そのもので検証済み。",
+    "hyo5_zero_under": 651000,
+    "hyo5_flat_kojo": 650000,
+    "hyo5_flat_upper": 1900000,
+    "hyo5_step": 4000,
+    "hyo5_upper": 6600000,
+    "kojo_brackets": [
+      { "upto": 1900000, "base": 650000, "rate_pct": 0, "over": 0 },
+      { "upto": 3600000, "base": 650000, "rate_pct": 30, "over": 1900000 },
+      { "upto": 6600000, "base": 1160000, "rate_pct": 20, "over": 3600000 },
+      { "upto": 8500000, "base": 1760000, "rate_pct": 10, "over": 6600000 },
+      { "upto": null, "base": 1950000, "rate_pct": 0, "over": 0 }
+    ]
+  },
+
+  "juminzei_kiso_kojo": {
+    "_source": "地方税法314条の2第2項（市町村民税）・34条2項（道府県民税）",
+    "brackets": [
+      { "upto": 24000000, "amount": 430000 },
+      { "upto": 24500000, "amount": 290000 },
+      { "upto": 25000000, "amount": 150000 },
+      { "upto": null, "amount": 0 }
+    ]
+  },
+
+  "shotokuzei_kiso_kojo": {
+    "_source": "所得税法86条1項＋租税特別措置法41条の16の2第1項1号（令和7年分・令和8年分の上乗せ）",
+    "_note": "人的控除差調整額の計算にだけ使う（地方税法37条の2第11項1号の『前年分の所得税に係る基礎控除の額』）。住民税そのものの計算には使わない。",
+    "brackets": [
+      { "upto": 1320000, "amount": 950000 },
+      { "upto": 3360000, "amount": 880000 },
+      { "upto": 4890000, "amount": 680000 },
+      { "upto": 6550000, "amount": 630000 },
+      { "upto": 23500000, "amount": 580000 },
+      { "upto": 24000000, "amount": 480000 },
+      { "upto": 24500000, "amount": 320000 },
+      { "upto": 25000000, "amount": 160000 },
+      { "upto": null, "amount": 0 }
+    ]
+  },
+
+  "shotoku_kojo": {
+    "_source": "地方税法314条の2第1項（住民税の人的控除の額）",
+    "haigusha": {
+      "ippan": [
+        { "nozeisha_goukei_upto": 9000000, "amount": 330000 },
+        { "nozeisha_goukei_upto": 9500000, "amount": 220000 },
+        { "nozeisha_goukei_upto": 10000000, "amount": 110000 },
+        { "nozeisha_goukei_upto": null, "amount": 0 }
+      ],
+      "rojin": [
+        { "nozeisha_goukei_upto": 9000000, "amount": 380000 },
+        { "nozeisha_goukei_upto": 9500000, "amount": 260000 },
+        { "nozeisha_goukei_upto": 10000000, "amount": 130000 },
+        { "nozeisha_goukei_upto": null, "amount": 0 }
+      ]
+    },
+    "fuyo_ippan": 330000,
+    "fuyo_tokutei": 450000,
+    "fuyo_rojin": 380000,
+    "fuyo_dokyo_rooya": 450000,
+    "shogai_ippan": 260000,
+    "shogai_tokubetsu": 300000,
+    "shogai_dokyo_tokubetsu": 530000,
+    "kafu": 260000,
+    "hitorioya": 300000,
+    "kinro_gakusei": 260000
+  },
+
+  "jinteki_kojo_sa": {
+    "_source": "地方税法37条1号イ／314条の6第1号イ（調整控除の表）。『所得税の人的控除 − 住民税の人的控除』の差として法が定める額",
+    "_note": "★実際の控除額の差ではなく、法が表で定めた額。ひとり親は父1万円・母5万円と差が付く（政令）。",
+    "kiso": 50000,
+    "haigusha": {
+      "ippan": [
+        { "nozeisha_goukei_upto": 9000000, "amount": 50000 },
+        { "nozeisha_goukei_upto": 9500000, "amount": 40000 },
+        { "nozeisha_goukei_upto": 10000000, "amount": 20000 },
+        { "nozeisha_goukei_upto": null, "amount": 0 }
+      ],
+      "rojin": [
+        { "nozeisha_goukei_upto": 9000000, "amount": 100000 },
+        { "nozeisha_goukei_upto": 9500000, "amount": 60000 },
+        { "nozeisha_goukei_upto": 10000000, "amount": 30000 },
+        { "nozeisha_goukei_upto": null, "amount": 0 }
+      ]
+    },
+    "fuyo_ippan": 50000,
+    "fuyo_tokutei": 180000,
+    "fuyo_rojin": 100000,
+    "fuyo_dokyo_rooya": 130000,
+    "shogai_ippan": 10000,
+    "shogai_tokubetsu": 100000,
+    "shogai_dokyo_tokubetsu": 220000,
+    "kafu": 10000,
+    "hitorioya_haha": 50000,
+    "hitorioya_chichi": 10000,
+    "kinro_gakusei": 10000
+  },
+
+  "zeiritsu": {
+    "_source": "地方税法314条の3（市町村民税6%・指定都市8%）／35条（道府県民税4%・指定都市2%）",
+    "shichoson_pct": 6,
+    "dofuken_pct": 4,
+    "shitei_shichoson_pct": 8,
+    "shitei_dofuken_pct": 2
+  },
+
+  "chosei_kojo": {
+    "_source": "地方税法314条の6（市町村3%・指定都市4%）／37条（道府県2%・指定都市1%）",
+    "_note": "合計課税所得金額が200万円以下なら『人的控除差の合計』と『合計課税所得金額』の少ない方、200万円超なら『人的控除差の合計 −（合計課税所得金額 − 200万円）』（5万円未満なら5万円）に率を掛ける。前年の合計所得金額が2,500万円を超える人は調整控除なし。",
+    "threshold": 2000000,
+    "floor_amount": 50000,
+    "goukei_shotoku_limit": 25000000,
+    "shichoson_pct": 3,
+    "dofuken_pct": 2,
+    "shitei_shichoson_pct": 4,
+    "shitei_dofuken_pct": 1
+  },
+
+  "kintouwari": {
+    "_source": "地方税法310条（市町村民税の均等割 3,000円）・38条（道府県民税の均等割 1,000円）／森林環境税及び森林環境譲与税に関する法律 3条（国が課する）・5条（1,000円）・附則2条（令和6年度以後の年度分から）",
+    "_note": "★東日本大震災の復興財源による均等割の上乗せ（市500円＋県500円）は『平成26年度から平成35年度まで』＝令和5年度分で終了している（平成23年法律第118号2条）。令和6年度分からは、これに代わる形で国税の森林環境税1,000円が住民税の均等割と併せて徴収される（合計5,000円は変わらないが、内訳と根拠法が別物になった）。",
+    "_jichitai_note": "★★標準税率どおりの自治体は少数派である。総務省『超過課税の状況』（令和7年4月1日現在）によれば、道府県民税の均等割で超過課税を行うのは47都道府県中37団体。市町村民税の均等割の超過課税は横浜市・神戸市の2団体のみ、所得割の超過課税は道府県では神奈川県のみ（+0.025%）・市町村では豊岡市のみ。名古屋市は逆に標準税率より低い（市民税所得割7.7%・均等割2,800円）。ここに載せるのは一次情報（各自治体の公式サイト）で実額を確認できたものだけ。未確認の自治体を推測で足さないこと（誤った税額を自信満々に出すことになる）。",
+    "_shinrin_note": "森林環境税は国税なので全国一律1,000円。自治体の超過課税は森林環境税には乗らない（森林環境税法7条は市町村民税均等割の『例により』徴収するとしつつ、条例による軽減を定める地方税法311条を明文で除外している）。",
+    "shinrin_kankyozei": 1000,
+    "jichitai": [
+      {
+        "key": "hyojun",
+        "label": "下記以外の自治体（標準税率）",
+        "shichoson_kintou": 3000,
+        "dofuken_kintou": 1000,
+        "shichoson_pct_x1000": 6000,
+        "dofuken_pct_x1000": 4000,
+        "shitei": false,
+        "note": "地方税法の標準税率どおり。ただし道府県民税の均等割は37/47団体が超過課税なので、実額は納税通知書で確認すること。"
+      },
+      {
+        "key": "kanagawa",
+        "label": "神奈川県（横浜・川崎・相模原市を除く）",
+        "shichoson_kintou": 3000,
+        "dofuken_kintou": 1300,
+        "shichoson_pct_x1000": 6000,
+        "dofuken_pct_x1000": 4025,
+        "shitei": false,
+        "note": "神奈川県の水源環境保全税。均等割+300円、所得割+0.025%（令和8年度まで。令和9年度からは+0.018%）。所得割に超過課税があるのは全国で神奈川県だけ。",
+        "url": "https://www.pref.kanagawa.jp/zei/kenzei/a001/b001/002.html"
+      },
+      {
+        "key": "yokohama",
+        "label": "横浜市",
+        "shichoson_kintou": 3900,
+        "dofuken_kintou": 1300,
+        "shichoson_pct_x1000": 8000,
+        "dofuken_pct_x1000": 2025,
+        "shitei": true,
+        "note": "横浜みどり税（市民税均等割+900円・令和10年度まで）＋神奈川県の水源環境保全税。市民税3,900円＋県民税1,300円＋森林環境税1,000円＝6,200円（横浜市の公表額と一致）。",
+        "url": "https://www.city.yokohama.lg.jp/kurashi/koseki-zei-hoken/zeikin/y-shizei/kojin-shiminzei-kenminzei/kojin-shiminzei-shosai/kojin.html"
+      },
+      {
+        "key": "kawasaki_sagamihara",
+        "label": "川崎市・相模原市",
+        "shichoson_kintou": 3000,
+        "dofuken_kintou": 1300,
+        "shichoson_pct_x1000": 8000,
+        "dofuken_pct_x1000": 2025,
+        "shitei": true,
+        "note": "指定都市なので所得割は市8%・県2%。県民税は神奈川県の水源環境保全税を含む。市民税均等割の超過課税は総務省の調べで横浜市・神戸市の2団体だけなので、標準の3,000円。"
+      },
+      {
+        "key": "hyogo",
+        "label": "兵庫県（神戸市を除く）",
+        "shichoson_kintou": 3000,
+        "dofuken_kintou": 1800,
+        "shichoson_pct_x1000": 6000,
+        "dofuken_pct_x1000": 4000,
+        "shitei": false,
+        "note": "兵庫県の県民緑税（県民税均等割+800円）。令和8年度〜令和12年度に延長済み。",
+        "url": "https://web.pref.hyogo.lg.jp/kk22/pa04_000000001.html"
+      },
+      {
+        "key": "kobe",
+        "label": "神戸市",
+        "shichoson_kintou": 3400,
+        "dofuken_kintou": 1800,
+        "shichoson_pct_x1000": 8000,
+        "dofuken_pct_x1000": 2000,
+        "shitei": true,
+        "note": "市民税3,400円のうち400円は認知症『神戸モデル』。県民税1,800円のうち800円は県民緑税。合計＋森林環境税1,000円＝6,200円（神戸市の公表額と一致）。",
+        "url": "https://www.city.kobe.lg.jp/a83576/kurashi/tax/shikenminze/keisan/index.html"
+      },
+      {
+        "key": "osaka",
+        "label": "大阪府（大阪市・堺市を除く）",
+        "shichoson_kintou": 3000,
+        "dofuken_kintou": 1300,
+        "shichoson_pct_x1000": 6000,
+        "dofuken_pct_x1000": 4000,
+        "shitei": false,
+        "note": "大阪府森林環境税（府民税均等割+300円・令和9年度まで）。国税の森林環境税とは別物で、両方かかる。",
+        "url": "https://www.pref.osaka.lg.jp/o120030/midorikikaku/shinrinkankyozei/shikumi.html"
+      },
+      {
+        "key": "osaka_shitei",
+        "label": "大阪市・堺市",
+        "shichoson_kintou": 3000,
+        "dofuken_kintou": 1300,
+        "shichoson_pct_x1000": 8000,
+        "dofuken_pct_x1000": 2000,
+        "shitei": true,
+        "note": "指定都市なので所得割は市8%・府2%。府民税均等割は大阪府森林環境税を含む。"
+      }
+    ]
+  },
+
+  "hikazei": {
+    "_source": "地方税法295条1項（生活扶助・障害者等）・3項＋施行令47条の3＋施行規則9条の21第2項（均等割の非課税限度額）／同法附則3条の3（所得割の非課税限度額）",
+    "_note": "★★均等割と所得割で根拠も金額も別。均等割は『政令で定める基準に従い条例で定める』（＝自治体差がある。生活保護法の級地区分で基本額が1.0/0.9/0.8倍される）。所得割は附則3条の3が法律で直接定めるので全国一律（級地は効かない）。加算額も21万円（均等割・級地倍率あり）と32万円（所得割・一律）で違う。この差があるので『所得割は非課税だが均等割は課税される』帯が生じる。",
+    "_shogaisha_note": "地方税法295条1項2号：障害者・未成年者・寡婦・ひとり親で前年の合計所得金額が135万円以下の人は、均等割も所得割も非課税（限度額の判定より先に効く）。",
+    "shogaisha_goukei_limit": 1350000,
+    "kintouwari": {
+      "_note": "基本額 ×（本人＋同一生計配偶者＋扶養親族の数）＋10万円＋（同一生計配偶者または扶養親族がいる場合のみ）加算額。判定に使うのは合計所得金額。★扶養親族の数には16歳未満の年少扶養親族も入る（施行令47条の3第1号が『年齢十六歳未満の者及び…控除対象扶養親族に限る』と明記）。年少扶養は所得控除には1円も効かないのに、非課税限度額には効く。",
+      "_kyuchi_note": "級地は生活保護法8条1項の保護の基準における地域の級地区分（前年12月31日現在）。率は施行規則9条の21第2項が1級地1.0・2級地0.9・3級地0.8と定める。政令の額（35万円・21万円）はあくまで『参酌基準』で、最終的には各市町村の条例が決める。",
+      "plus": 100000,
+      "kyuchi": {
+        "1": { "kihon": 350000, "kasan": 210000, "label": "1級地（東京23区・政令指定都市・県庁所在地など）" },
+        "2": { "kihon": 315000, "kasan": 189000, "label": "2級地（中規模の市など）" },
+        "3": { "kihon": 280000, "kasan": 168000, "label": "3級地（町村など）" }
+      }
+    },
+    "shotokuwari": {
+      "_note": "35万円 ×（本人＋同一生計配偶者＋扶養親族の数）＋10万円＋（同一生計配偶者または扶養親族がいる場合のみ）32万円。全国一律。判定に使うのは総所得金額等。",
+      "kihon": 350000,
+      "kasan": 320000,
+      "plus": 100000
+    }
+  },
+
+  "furusato": {
+    "_source": "地方税法37条の2・314条の7（寄附金税額控除）／同法附則5条の6（特例控除額の割合の読替え）",
+    "_chokazei_note": "★★ふるさと納税の限度額は自治体の超過課税で1円も変わらない。37条の2第11項の20%上限は『第三十五条及び前条の規定を適用した場合の所得割の額』＝標準税率（県4%・市6%、指定都市は2%・8%）で計算した所得割額を明文で指すため。神奈川県（所得割+0.025%）でも名古屋市（所得割7.7%の減税）でも限度額は同じ。一方で『実際に払う住民税』のほうは超過課税・減税がそのまま効く。同じ条文から、限度額は自治体差なし・納税額は自治体差ありという逆の答えが出る。",
+    "jiko_futan": 2000,
+    "kihon_pct": 10,
+    "tokurei_cap_pct": 20,
+    "kihon_shotoku_cap_pct": 30,
+    "tokurei_ritsu": {
+      "_note": "★附則5条の6による読替え後の割合（平成26年度〜令和20年度）。本則の85/80/70/67/57/50/45%ではない。値は『90% − 所得税の限界税率 × 1.021』に一致する。pct_x1000 は百分率×1000（84.895% → 84895）。判定に使うのは『住民税の課税総所得金額 − 人的控除差調整額』。",
+      "brackets": [
+        { "upto": 1950000, "pct_x1000": 84895, "honsoku_pct": 85, "shotokuzei_pct": 5 },
+        { "upto": 3300000, "pct_x1000": 79790, "honsoku_pct": 80, "shotokuzei_pct": 10 },
+        { "upto": 6950000, "pct_x1000": 69580, "honsoku_pct": 70, "shotokuzei_pct": 20 },
+        { "upto": 9000000, "pct_x1000": 66517, "honsoku_pct": 67, "shotokuzei_pct": 23 },
+        { "upto": 18000000, "pct_x1000": 56307, "honsoku_pct": 57, "shotokuzei_pct": 33 },
+        { "upto": 40000000, "pct_x1000": 49160, "honsoku_pct": 50, "shotokuzei_pct": 40 },
+        { "upto": null, "pct_x1000": 44055, "honsoku_pct": 45, "shotokuzei_pct": 45 }
+      ],
+      "minus_pct_x1000": 90000
+    }
+  }
+}
