@@ -40,17 +40,16 @@ jobs:
 
       # README が言及する成果物が公開物に入っているかを、publish 前に確かめる
       # (1.1.0 で files に mcp を入れ忘れ、README だけ「同梱」と書いた事故の再発防止)
+      # ※ --json の出力形は npm 11 と 12 で違う(12 でトップレベル配列でなくなった)ので
+      #    バージョン差に強いテキスト出力を見る。
+      # ※ npm は bin が指すファイルを files に関係なく自動収録するので、
+      #    いまは files と bin の両方から外れて初めてこの検査が落ちる。
       - name: 公開物に mcp/ が入っているか
         run: |
-          npm pack --dry-run --json > /tmp/pack.json
-          node -e '
-            const files = require("/tmp/pack.json")[0].files.map(f => f.path);
-            if (!files.includes("mcp/server.mjs")) {
-              console.error("::error::公開tarballに mcp/server.mjs が入っていない (package.json の files を確認)");
-              process.exit(1);
-            }
-            console.log("ok: mcp/server.mjs 収録");
-          '
+          npm pack --dry-run 2>&1 | tee /tmp/pack.txt
+          grep -q "mcp/server\.mjs" /tmp/pack.txt \
+            || { echo "::error::公開tarballに mcp/server.mjs が入っていない (package.json の files / bin を確認)"; exit 1; }
+          echo "ok: mcp/server.mjs 収録"
 
       - run: npm publish
 
