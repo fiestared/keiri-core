@@ -78,6 +78,25 @@ npm test
 
 全一覧と入力の形は各 `src/*_core.js` の JSDoc、実挙動は [keiri-tools.com](https://keiri-tools.com/) で確認できます。
 
+## AIエージェントから使う（MCP サーバー）
+
+AIエージェント（Claude Desktop / Claude Code など）が、日本の税・給与の計算を**ツールとして直接呼べます**。
+`mcp/server.mjs` は依存ゼロ・stdio の MCP サーバーです。設定に追加するだけ:
+
+```json
+{
+  "mcpServers": {
+    "keiri-core": { "command": "node", "args": ["<path>/keiri-core/mcp/server.mjs"] }
+  }
+}
+```
+
+提供ツール: `take_home_pay`（手取り）/ `income_tax`（所得税額）/ `deduction_tax_saving`（所得控除の節税額）/
+`dependent_deduction`（扶養控除）。「額面30万・東京都の手取りは？」で AI が計算して答えます（＝検証済みエンジンの値）。
+
+> 外部の AI（ChatGPT 等）に公開したい場合は、同じツール定義を **Cloudflare Workers（無料枠）** の HTTP/SSE
+> トランスポートに載せます（stdio版がその中身）。計算は純関数なので、状態も外部通信もありません。
+
 ## 免責
 
 本ライブラリは**一般的な情報提供**であり、税務・労務の個別助言ではありません。料率・制度は改定されます。
