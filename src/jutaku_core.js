@@ -6,6 +6,15 @@
  * - 国税庁タックスアンサー No.1211-1『住宅の新築等をし、令和4年以降に居住の用に供した場合
  *   （住宅借入金等特別控除）』（令和7年4月1日現在法令等）
  *   https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211-1.htm
+ * - ★令和8年（2026年）入居分：租税特別措置法41条（令和8年法律第12号による改正後。
+ *   e-Gov法令API v2 の現行施行版で逐語確認）＋令和8年度税制改正の大綱（2025-12-26閣議決定）。
+ * - ★令和9年（2027年）入居分：令和8年と同値（2026-07-20 条文で確認。41条の居住年レンジは
+ *   全て令和12年まで・41条/措令26条とも2028-01-01施行リビジョンまで逐語同一＝未施行改正なし。
+ *   41条25項の段差は令和10年1月1日以後の居住にのみ効く）。
+ *   タックスアンサーは2026-07-19時点で令和7年版のまま未更新＝令和8年分の正本は条文。
+ *   改正の骨子：適用期限を令和12年12月31日まで5年延長／中古（既存認定住宅等）が13年・3,500万円へ／
+ *   子育て世帯等の上乗せが中古にも／中古も40㎡から（所得1,000万円以下の年のみ）／
+ *   ★40〜50㎡（小規模）には令和8年以降、上乗せが効かない（41条9項かっこ書き）。
  * - 根拠条文：租税特別措置法41条
  *
  * ★★ ここを取り違えると「黙って間違える」点（この計算のいちばん危ない所）:
@@ -14,12 +23,17 @@
  *    平成26年〜令和3年入居は1％だった。1％のまま作ると控除額を約1.4倍に過大表示する。
  *    → 率は JSON の koujo_ritsu_permille（=7/1000）だけを正本にし、コードに 0.01 も 0.007 も書かない。
  *
- * 2. **「その他の住宅」を令和6年・令和7年に新築入居した人は、原則1円も控除されない（借入限度額0円）。**
+ * 2. **「その他の住宅」を令和6年以降（令和8年を含む）に新築入居した人は、原則1円も控除されない（借入限度額0円）。**
  *    省エネ基準を満たさない新築は令和6年以降ゼロになった。ところが利用者は
  *    「住宅ローンを組んだのだから当然控除される」と思っている。ここで 3,000万円のままにすると
  *    もらえない21万円/年を「もらえる」と嘘をつく。
  *    → 経過措置（令和5年末までに建築確認、または令和6年6月末までに建築）に該当するときだけ
  *      2,000万円・10年で復活する。該当を尋ねてからでないと0とも14万とも言えない。
+ *      ★経過措置は建築の日付で決まり居住年の限定が無いので令和8年入居にも生きる（措令26条43項）。
+ *    ★★非認定の「買取再販住宅」（宅建業者のリフォーム済み再販）は新築と違い0円にならない
+ *      （令和6年以降の入居で一律2,000万円・10年＝措法41条3項3号・No.1211-2。数字は中古×その他と同じ）。
+ *      このツールは新築と買取再販を1つの選択肢に束ねているので、0円と答える画面で
+ *      「買取再販なら中古×その他で計算」と必ず誘導する（黙って0円と言うと140万円の嘘になる）。
  *
  * 3. **各年の控除額は「その年の年末残高」で決まり、毎年減っていく。**
  *    借入限度額 × 0.7％ は“天井”であって、実際の控除額は min(年末残高, 取得対価等, 借入限度額) × 0.7％。
@@ -40,11 +54,21 @@
  *      所得税額は源泉徴収票・確定申告で分かるので入力させる。未入力なら“上限概算”のまま（黙って満額戻ると言わない）。
  *
  * 6. **中古（既存住宅）は新築・買取再販と別レジーム（No.1211-3）。混ぜると桁で間違える。**
- *    ★新築と違い『その他の住宅』でも令和6・7年入居で0円にならない（一律2,000万・10年）。
- *    控除期間は一律10年（新築13年より短い）。子育て特例の上乗せは無い。床面積は50㎡以上
- *    （新築の40〜50㎡の特例＝小規模居住用家屋は中古に無い）。借入限度額は認定住宅等（認定・ZEH・
- *    省エネをまとめて）3,000万・その他2,000万。→ 中古は D.chuko を使い、type='chuko' で分岐する。
+ *    ★新築と違い『その他の住宅』でも令和6年以降の入居で0円にならない（一律2,000万・10年）。
+ *    ★★中古のルールは令和8年入居で大きく変わった（入居年で分岐する。混ぜると桁で間違える）:
+ *      【令和4〜7年入居】認定住宅等（認定/ZEH/省エネまとめて）3,000万・その他2,000万、控除期間は一律10年。
+ *        子育て特例の上乗せ無し。床面積50㎡以上。
+ *      【令和8年入居〜】認定・ZEH水準3,500万／省エネ基準適合2,000万／その他2,000万。
+ *        控除期間は認定住宅等13年・その他10年。★子育て特例の上乗せが中古にも効く
+ *        （認定・ZEH→4,500万／省エネ→3,000万。その他には無い）。★床面積40㎡から
+ *        （40〜50㎡は合計所得1,000万円以下の年のみ＝特例既存住宅・41条17項）。
+ *    → 中古は D.chuko.kubun[kubun].years[year] を使い、type='chuko' で分岐する。
  *    ★増改築等（No.1211-4）は計算方法がまるごと違う → beyondData を立てて「黙って答えない」（fail closed）。
+ *
+ * 7. **令和8年以降の入居では、40〜50㎡（小規模）の住宅に子育て特例の上乗せが効かない。**
+ *    41条9項かっこ書きが令和6・7年入居は特例認定住宅等（40〜50㎡）を「含む」、令和8年以降は
+ *    「除く」と書き分けている。→ 床面積を先に判定し、shokibo かつ令和8年以降なら上乗せを適用せず
+ *    tokureiDeniedShokibo を立てる（黙って上乗せ後の額を見せると 500万円分の限度額の嘘になる）。
  */
 
 /** 円に丸める（0未満・未入力・数値でないものは0）。undefined を素通しすると結果が NaN になり画面が全損する。 */
@@ -60,15 +84,22 @@ const yen = (n) => {
 export function resolveGendo(kubun, year, tokurei, keikaSochi, D, type) {
   type = type || 'shinchiku';
 
-  // 中古（既存住宅・No.1211-3）… 令和4〜令和7年入居で一律。区分は認定住宅等（認定/ZEH/省エネ）3,000万・
-  // その他2,000万、控除期間はどちらも10年。★子育て特例の上乗せも経過措置も無い（新築と違う）ので
-  // tokurei・keikaSochi は素通しにする（フラグが立っていても無視）。
+  // 中古（既存住宅・No.1211-3／令和8年〜は措法41条6・7・9項）… 入居年ごとの表を引く。
+  // ★令和8年入居から子育て特例の上乗せが中古にも効く（tokurei_gendo_man を持つ年だけ。
+  //   令和7年以前の年エントリには無いので、フラグが立っていても素通しになる）。
+  // 経過措置（keika_*）は中古の表に無い（その他でも0円にならないので不要）＝素通し。
   if (type === 'chuko') {
     const C = D.chuko;
-    if (!C || !C.years_valid.includes(String(year))) return null;
-    const K = C.kubun[kubun];
-    if (!K) return null;
-    return { gendoMan: K.gendo_man, kikan: K.kikan, keika: false, tokureiApplied: false, zero: false };
+    const K = C && C.kubun[kubun];
+    const y = K && K.years[String(year)];
+    if (!y) return null;
+    let gendoMan = y.gendo_man;
+    let tokureiApplied = false;
+    if (tokurei && y.tokurei_gendo_man) {
+      gendoMan = y.tokurei_gendo_man;
+      tokureiApplied = true;
+    }
+    return { gendoMan, kikan: y.kikan, keika: false, tokureiApplied, zero: false };
   }
 
   const K = D.kubun[kubun];
@@ -181,28 +212,44 @@ export function calc(input, D) {
 
   const isChuko = type === 'chuko';
   const yearNum = Math.floor(Number(input.year));
-  const g = resolveGendo(input.kubun, yearNum, !!input.kosodateTokurei, !!input.keikaSochi, D, type);
+
+  // ── 床面積要件（入力があるときだけ判定。無ければ判定せず注意喚起する）──
+  // ★令和8年以降は 40〜50㎡（小規模）だと特例対象個人の上乗せが効かないので、
+  //   借入限度額を引く**前に**床面積を判定する必要がある（順序に意味がある）。
+  // ★中古の下限は令和7年以前の入居で50㎡（40〜50㎡の特例は新築だけ）、
+  //   令和8年入居からは新築と同じ40㎡（特例既存住宅・措法41条17項）。
+  const Y = D.shotoku_yoken;
+  const chukoShokiboFrom = D.chuko && D.chuko.shokibo_from_year; // 2026（令和8）
+  const mensekiFloor = isChuko && !(chukoShokiboFrom && yearNum >= chukoShokiboFrom)
+    ? D.chuko.menseki_min : Y.shokibo_menseki_min;               // 中古(〜令和7)50・それ以外40
+  const mensekiFull = isChuko ? D.chuko.menseki_min : Y.menseki_min; // どちらも50
+  const menseki = input.menseki != null && input.menseki !== '' ? Number(input.menseki) : null;
+  let mensekiStatus = 'unknown'; // 'unknown' | 'ok' | 'shokibo'(40〜50㎡未満) | 'too_small'
+  if (menseki != null && Number.isFinite(menseki)) {
+    if (menseki < mensekiFloor) mensekiStatus = 'too_small';
+    else if (menseki < mensekiFull) mensekiStatus = 'shokibo'; // 中古は令和7年以前 floor==full なので立たない
+    else mensekiStatus = 'ok';
+  }
+
+  // ★令和8年以降の入居では、40〜50㎡（小規模）の住宅に特例対象個人の上乗せが無い
+  //  （措法41条9項かっこ書き「特例認定住宅等を除く」。令和6・7年は「含む」なので上乗せあり）。
+  const ST = D.shokibo_tokurei;
+  const tokureiDenied = !!input.kosodateTokurei && mensekiStatus === 'shokibo'
+    && !!ST && yearNum >= ST.exclude_from_year;
+
+  const g = resolveGendo(input.kubun, yearNum, !!input.kosodateTokurei && !tokureiDenied, !!input.keikaSochi, D, type);
   if (!g) {
+    // 収録範囲はデータの years キーから描く（年を足すたびに文言を手で直すと必ずずれて、
+    // 「収録範囲の外です」が実際には収録済みの年を名指しする嘘になる）。
+    const recorded = Object.keys((isChuko ? D.chuko.kubun : D.kubun).nintei.years).map(Number);
+    const era = (y) => `令和${y - 2018}`;
+    const hani = `${era(Math.min(...recorded))}〜${era(Math.max(...recorded))}年`;
     return {
       ...base, beyondData: true, eligible: false,
       reason: isChuko
-        ? `入居年（${input.year}）または住宅区分が、中古（既存住宅）の収録範囲（令和4〜令和7年入居）の外です。`
-        : `入居年（${input.year}）または住宅区分が、このツールの収録範囲（令和4〜令和7年に新築・買取再販へ入居）の外です。`,
+        ? `入居年（${input.year}）または住宅区分が、中古（既存住宅）の収録範囲（${hani}入居）の外です。`
+        : `入居年（${input.year}）または住宅区分が、このツールの収録範囲（${hani}に新築・買取再販へ入居）の外です。`,
     };
-  }
-
-  // ── 所得要件・床面積要件（入力があるときだけ判定。無ければ判定せず注意喚起する）──
-  // ★中古は床面積50㎡以上が要件（新築の40〜50㎡＝小規模居住用家屋の特例は中古に無い）。
-  //   新築は floor=40（40〜50㎡は小規模）／中古は floor=full=50（40〜50㎡でも対象外）。
-  const Y = D.shotoku_yoken;
-  const mensekiFloor = isChuko ? D.chuko.menseki_min : Y.shokibo_menseki_min; // 中古50・新築40
-  const mensekiFull = isChuko ? D.chuko.menseki_min : Y.menseki_min;          // どちらも50
-  const menseki = input.menseki != null && input.menseki !== '' ? Number(input.menseki) : null;
-  let mensekiStatus = 'unknown'; // 'unknown' | 'ok' | 'shokibo'(新築のみ40〜50㎡未満) | 'too_small'
-  if (menseki != null && Number.isFinite(menseki)) {
-    if (menseki < mensekiFloor) mensekiStatus = 'too_small';
-    else if (menseki < mensekiFull) mensekiStatus = 'shokibo'; // 中古は floor==full なので立たない
-    else mensekiStatus = 'ok';
   }
   const shotokuLimit = mensekiStatus === 'shokibo' ? Y.shokibo_goukei_shotoku_limit : Y.goukei_shotoku_limit;
   const goukeiShotoku = input.goukeiShotoku != null && input.goukeiShotoku !== '' ? yen(input.goukeiShotoku) : null;
@@ -254,6 +301,7 @@ export function calc(input, D) {
     // 状態フラグ（ページが文言・警告を出すのに使う）
     isChuko,                  // 中古（既存住宅）か（ページが中古専用の注意書きを出すのに使う）
     tokureiApplied: g.tokureiApplied,
+    tokureiDeniedShokibo: tokureiDenied, // ★令和8年以降×40〜50㎡で上乗せを適用しなかった（ページが理由を出す）
     keikaApplied: g.keika,
     sonotaZero: g.zero,
     mensekiStatus,

@@ -153,9 +153,18 @@ export function normalize(input, maxLen = MAX_LEN_DEFAULT) {
   const bad = [...new Set([...out].filter((c) => !ALLOWED.test(c)))];
   if (bad.length) {
     const kanji = bad.filter((c) => KANJI.test(c));
-    const other = bad.filter((c) => !KANJI.test(c));
+    // ★ワ行の濁音(ヷヸヹヺ)は「記号」ではなくカナ。半角カナ表に無く機械的には変換できないが、
+    //   「使える記号は ( ) - . だけ」という記号向けの説明を出すのは誤り(2026-07-19レビュー)。
+    //   名義の実際の登録表記(ﾜ・ﾊﾞ等)は口座側で決まっているので、確認を促す文言にする。
+    const wagyo = bad.filter((c) => /[ヷヸヹヺ]/.test(c));
+    const other = bad.filter((c) => !KANJI.test(c) && !/[ヷヸヹヺ]/.test(c));
     const parts = [];
     if (kanji.length) parts.push(`${kanji.join(" ")} (漢字は読みをカナで入力してください)`);
+    if (wagyo.length) {
+      parts.push(
+        `${wagyo.join(" ")} (ワ行の濁音は全銀の半角カナに無い文字です。口座名義がどの表記(ﾜ・ﾊﾞ 等)で登録されているかを通帳・銀行に確認し、その表記で入力してください)`
+      );
+    }
     if (other.length) {
       parts.push(
         `${other.join(" ")} (受取人名で使える記号は ( ) - . と半角スペースだけです)`

@@ -74,11 +74,20 @@ export function koseiStandard(monthly) {
 /**
  * 保険料の端数処理。労使折半で円未満が出た場合、
  * 被保険者負担分は50銭以下切捨・50銭超切上（納入告知書の通例）。
+ *
+ * ★浮動小数のまま `frac > 0.5` と比べてはいけない。50銭**ちょうど**（例: 新潟9.21%・
+ *   標準報酬110,000円 → 折半5,065.5円）が二進小数で 5,065.500000000001 になり、
+ *   「50銭以下切捨」のはずが+1円（本人負担が過大）になる。50等級×47都道府県×介護の
+ *   4,700組中304件で実際に+1円が出ていた（2026-07-19レビューで実測）。
+ *   → 0.1銭単位に整数化してから判定する。このコアに入る値は
+ *     標準報酬月額(1,000円の倍数)×料率(小数2桁%) か 賃金×整数‰ なので、
+ *     0.1銭単位では常に正確な整数になり、Math.round は浮動小数の微小誤差だけを消す。
  */
 export function roundHalf(v) {
-  const int = Math.floor(v);
-  const frac = v - int;
-  return frac > 0.5 ? int + 1 : int;
+  const sen10 = Math.round(v * 1000);        // 0.1銭単位に整数化
+  const int = Math.floor(sen10 / 1000);      // 円
+  const frac = sen10 - int * 1000;           // 端数（0.1銭単位。500 = 50銭ちょうど）
+  return frac > 500 ? int + 1 : int;
 }
 
 export function kaigoApplies(age) {

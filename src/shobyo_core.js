@@ -174,6 +174,12 @@ export function nichigaku(standards, D, opt) {
  *   「暦に従って1年6月間の計算を行い、傷病手当金の支給期間を確定する」と明記しており、
  *   **総日数は支給開始日によって変わる**（549日にも546日にもなる）。
  *
+ * ★満了日は民法143条2項で決まる（期間の計算は健保法に別段の定めがなく民法の原則による）:
+ *   18か月後の**起算日応当日の前日**が満了日。**応当日が無い月は、その月の末日**に満了する
+ *   （ただし書）。8/30・8/31 開始 → 18か月後は 2/30・2/31 で存在しない → **2月末日**が満了日。
+ *   ★`new Date(y, m+18, d)` は存在しない日を**翌月へ繰り越す**（2/30→3/1）ので使えない。
+ *     繰り越してから前日を取ると、満了日が1〜2日**遅く**出ていた（2026-07-19レビューで修正。
+ *     ikuji/yukyu と同じ addMonthsClamped 方式に統一）。
  * @param startDate 支給を **始めた** 日（待期3日の翌日＝4日目）
  * @returns { start, end, totalDays } end は最終日（開始日 + 18か月 − 1日）
  */
@@ -182,9 +188,14 @@ export function shikyuKikan(startDate) {
     throw new Error('支給を始めた日（YYYY-MM-DD）が必要です');
   }
   const [y, m, d] = startDate.split('-').map(Number);
-  // 開始日の18か月後の前日が最終日（例: 2022-03-04 → 2023-09-03）
-  const end = new Date(Date.UTC(y, m - 1 + 18, d));
-  end.setUTCDate(end.getUTCDate() - 1);
+  // 18か月後の「月」だけを先に決め（日は繰り越さない）、応当日を末日でクランプする
+  const t = new Date(Date.UTC(y, m - 1 + 18, 1));
+  const ty = t.getUTCFullYear();
+  const tm = t.getUTCMonth() + 1;
+  const lastDay = new Date(Date.UTC(ty, tm, 0)).getUTCDate(); // 18か月後の月の末日
+  const end = d > lastDay
+    ? new Date(Date.UTC(ty, tm - 1, lastDay))      // 応当日なし → その月の末日に満了（民法143条2項ただし書）
+    : new Date(Date.UTC(ty, tm - 1, d - 1));       // 応当日あり → その前日に満了（民法143条2項本文）
   const start = new Date(Date.UTC(y, m - 1, d));
   const totalDays = Math.round((end - start) / 86400000) + 1; // 両端を含む
   return { start: startDate, end: end.toISOString().slice(0, 10), totalDays };
@@ -297,7 +308,8 @@ export function calcShobyo(input, D) {
   //
   //   99条1項が排除しているのは **任意継続の期間中に新たに労務不能になった人** だけ。
   //   病気で辞めた人はほぼ全員が任意継続を選ぶ（病気なのだから保険が要る）ので、
-  //   ここを取り違えると **いちばん重い病気の人に「¥0」と答える**（月給30万で 3,640,182円）。
+  //   ここを取り違えると **いちばん重い病気の人に「¥0」と答える**（月給30万・546日休業で
+  //   3,620,181円 = 待期3日を引いた543日 × 6,667円。test_shobyo.mjs / e2e shobyo_keizoku の正値）。
   if (i.ninnikeizoku) {
     const k = keizokuKyufu({
       hihokenshaMonths: hihokenshaMonths(i),

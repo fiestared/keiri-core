@@ -6,6 +6,10 @@
  * ★このコアは新しい税率表を1つも書き起こさない。
  *   - 年収 → 総所得金額等 の換算は juminzei_core の kyuyoShotoku（所法28条・別表第五）を**再利用**する
  *     （速算式ではなく別表第五で求めるのが法。正本を1つに保つ）。
+ *     ★令和8年分・令和9年分は zeisei:'r8' を渡して kyuyoShotokuR8（措法29条の4）を使う。
+ *       改正で給与所得控除の最低保障が65万→74万になったので、収入220万円未満の人だけ
+ *       総所得金額等が下がる＝**足切り（5%側）が下がって控除額が増える**。R7規則のまま計算すると
+ *       いちばん救われるべき低所得の人の控除額を最大4,500円ぶん過少に出す（黙って損をさせる）。
  *   - 足切り・上限・セルフメディの金額、所得税の速算表は iryohi_r08.json に持たせる。
  *
  * ★★このツールでいちばん嘘をつきやすい2点（ここを取り違えると黙って誤答する）:
@@ -30,7 +34,7 @@
  *           国税庁 No.1120・No.1122・No.1125・No.1129・No.2260・No.1410。
  */
 
-import { kyuyoShotoku } from './juminzei_core.js';
+import { kyuyoShotoku, kyuyoShotokuR8 } from './juminzei_core.js';
 
 /** 円に丸める（0未満・未入力・数値でないものは0）。NaN を素通しすると控除額が丸ごと NaN になる。 */
 const yen = (n) => {
@@ -142,7 +146,10 @@ export function calcIryohi(input, refs) {
     sotoShotoku = yen(i.sotoShotoku);
   } else {
     if (!D) throw new Error('参照データ（juminzei_r08.json）が渡されていません（年収→総所得金額等の換算に必要）');
-    sotoShotoku = kyuyoShotoku(yen(i.kyuyoShunyu), D);
+    // ★zeisei:'r8' ＝ 令和8年分・令和9年分（措法29条の4）。データが無ければ例外＝黙ってR7で答えない。
+    sotoShotoku = i.zeisei === 'r8'
+      ? kyuyoShotokuR8(yen(i.kyuyoShunyu), D)
+      : kyuyoShotoku(yen(i.kyuyoShunyu), D);
   }
 
   const ashikiri = ashikiriGaku(sotoShotoku, I);

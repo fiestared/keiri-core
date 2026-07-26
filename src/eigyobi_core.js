@@ -51,15 +51,20 @@ export function isClosed(dt, holidays, opt = {}) {
 
 /**
  * 期間の日数を数える。
+ * @param includeFirst true=両端を含む / false=初日不算入（民法140条。**開始日を数えず、終了日は数える**）
+ *   ★以前は false のとき誤って**終了日**を除外していた。総日数は同じでも、
+ *     営業日/休業日の内訳と祝日リストが1日ずれる（例: 金曜開始〜月曜(祝)終了で、
+ *     開始日の金曜を営業日1日と数え、終了日の祝日を落とす）。2026-07-19レビューで修正。
  * @returns {{total, business, closed, holidays: [{date,name}], weekdays: number[]}}
  */
-export function countDays(from, to, holidays, opt = {}, includeEnd = true) {
+export function countDays(from, to, holidays, opt = {}, includeFirst = true) {
   if (diffDays(from, to) < 0) [from, to] = [to, from];
-  const end = includeEnd ? diffDays(from, to) : diffDays(from, to) - 1;
+  const start = includeFirst ? 0 : 1; // 初日不算入 = 開始日の翌日から数える
+  const end = diffDays(from, to);
   let total = 0, business = 0, closed = 0;
   const hs = [];
   const weekdays = [0, 0, 0, 0, 0, 0, 0];
-  for (let i = 0; i <= end; i++) {
+  for (let i = start; i <= end; i++) {
     const dt = shift(from, i);
     total++;
     weekdays[dow(dt)]++;

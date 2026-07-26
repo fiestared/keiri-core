@@ -20,6 +20,16 @@ export const THRESHOLD = 1000000; // 100万円
 export const FIXED_ADD = 102100;  // 100万円超のときの加算額
 export const SHIHO_DEDUCTION = 10000; // 司法書士等: 1回の支払につき1万円控除
 
+// 消費税の標準税率 10%（消費税法29条の 7.8% ＋ 地方税法72条の83の 22/78 ＝ 2.2%）。
+// ★ページに 0.1 と「10%」を手書きしていたのをここへ集約した（2026-07-26）。
+//   率の数値と画面の表示ラベルを別々に持つと、税率が変わった日に**片方だけ直る**
+//   （計算は新税率・表示は「10%」のまま、あるいはその逆）。どちらも利用者には見分けがつかない。
+// ★軽減税率8%は飲食料品・定期購読新聞に限られ（消税法別表第一）、
+//   源泉徴収の対象になる報酬・料金には適用されないので、ここでは標準税率だけを持つ。
+export const RATE_SHOHIZEI = 0.10;
+/** 消費税率の画面表示（「10%」）。計算に使う率と同じ1つの値から描く */
+export const RATE_SHOHIZEI_LABEL = `${RATE_SHOHIZEI * 100}%`;
+
 /** 報酬の種類 */
 export const KINDS = {
   general: {
@@ -91,6 +101,15 @@ export function calcWithholding(amount, kind = "general") {
  */
 export function withholdingTarget(fee, taxRate, separated) {
   const total = Math.floor(fee * (1 + taxRate));
+  // ★消費税なし（不課税・免税）のときに「区分されていないため税込金額の全体が対象」と
+  //   言ってはいけない — 消費税が存在しないのだから「区分」の話ではない
+  //   （2026-07-19レビュー: 説明文が、消費税の行を出さない結果表と矛盾していた）。
+  if (taxRate === 0) {
+    return {
+      target: total, total,
+      explain: "消費税のかからない取引（不課税・免税）のため、報酬額そのものが源泉徴収の対象です。",
+    };
+  }
   if (separated) {
     return {
       target: fee, total,

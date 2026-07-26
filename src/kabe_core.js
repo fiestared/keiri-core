@@ -86,11 +86,19 @@ export function calcKabe(input, refs) {
   // 壁以上なら「壁−1円」まで働いた人の手取り（＝壁の手前の最大手取り）。
   const reference = annual < wall ? annual : (wall - 1);
 
-  // 回復年収：壁以上で、手取りが reference 以上に戻る最小の年収（1,000円刻みで掃引）。
+  // 回復年収：壁以上で、手取りが reference 以上に戻り、**以後（掃引範囲内で）ずっと基準以上**で
+  // あり続ける最小の年収（1,000円刻みで掃引）。
+  // ★「最初に基準以上になった点」で止めてはいけない: 手取りは等級の境界で凹む
+  //   （年収が1,000円増えると保険料が1万円以上増える帯がある）ので、最初の交差点の先で
+  //   基準を再び割る可能性がある。「◯◯円以上を目指す」という助言が偽になる帯を作らないため、
+  //   基準未満に落ちる**最後の点**を探し、その次を回復年収とする。
+  //   （令和8年度の等級表・全47都道府県では両定義は同じ値になることを test_kabe.mjs が確認している。
+  //     等級表・料率の改定でズレが生まれても、この定義なら助言は破れない）
   let recovery = null;
   for (let a = wall; a <= wall + 4000000; a += 1000) {
     const t = a - shakaiHokenAnnual(a, age, kenkoRate, S).annual;
-    if (t >= reference) { recovery = a; break; }
+    if (t >= reference) { if (recovery == null) recovery = a; }
+    else recovery = null; // 基準を割ったらやり直し（以後ずっと基準以上、を保証する）
   }
 
   // 壁の底：壁ちょうどで加入した瞬間の手取り（年収は増えていないのに社保だけ引かれて一番凹む点）。

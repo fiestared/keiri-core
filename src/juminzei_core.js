@@ -11,7 +11,17 @@
  *   附則5条の6       ★特例控除額の割合の読替え（平成26年度〜令和20年度）
  *   20条の4の2       端数計算（課税標準は1,000円未満切捨／確定金額は100円未満切捨）
  * - 所得税法 28条2〜4項・別表第五（給与所得）／86条（基礎控除）
- * - 租税特別措置法 41条の16の2（令和7年分・令和8年分の基礎控除の上乗せ）
+ * - 租税特別措置法 41条の16の2（基礎控除の上乗せ）／29条の4（令和8年・9年の給与所得控除の特例）
+ *
+ * ★★ 令和8年度税制改正（令和8年法12号・令和8年12月1日施行だが令和8年分に遡及適用）で、
+ *    「令和7年分」と「令和8年分」の規則が分かれた（それまでは同一だった）:
+ *    - 令和7年分（＝令和8年度住民税の基礎）… 給与所得控除の最低保障65万・所得税の基礎控除58万＋加算
+ *      → 従来どおり kyuyoShotoku / shotokuzeiKisoKojo（既定）
+ *    - 令和8年分・令和9年分（＝令和9・10年度住民税、2026・2027年寄附のふるさと納税）
+ *      … 措法29条の4（収入220万円以下は給与所得控除74万円・219.1万〜220万は量子化3帯）＋
+ *        所法86条改正（62万円）＋措法41条の16の2（489万以下+42万／655万以下+5万）
+ *      → calc() に zeisei:'r8' を渡す（kyuyoShotokuR8 / shotokuzei_kiso_kojo_r8 を使う）
+ *    住民税側（基礎控除43万・税率・調整控除・非課税限度額）はこの改正の対象外（所得税のみ）。
  *
  * ★★ この実装でいちばん大事な事実（ここを取り違えると黙って間違える）:
  *
@@ -106,6 +116,31 @@ export function kyuyoShotoku(shunyu, D) {
   return yen(s - kyuyoKojo(s, D));
 }
 
+/**
+ * 給与所得（令和8年分・令和9年分 ＝ 措法29条の4）。
+ *
+ * ★ 令和8年度税制改正（令和8年法12号）の特例。条文の逐語（R8-12-01施行版）:
+ *    ②一 収入 69.1万以上 74.1万未満 … 給与所得は「ないものとする」（74.1万未満は①の定額控除でも0）
+ *    ②二 収入 74.1万以上 219.1万未満 … 収入 − 74万円
+ *    ②三〜五 219.1万〜219.3万 → 145.1万 ／ 219.3万〜219.6万 → 145.3万 ／ 219.6万〜220万 → 145.6万
+ *    ① 収入220万円ちょうど … 控除74万円 → 所得146万円 ＝ 別表第五の区分（220万〜220.4万）と同額。
+ * ★ 収入220万円以上は改正後の別表第五と改正前が完全一致（全1,100行を機械照合済み）なので、
+ *    既存の kyuyoShotoku（別表第五・速算式）へそのまま委譲する。境界は連続する。
+ */
+export function kyuyoShotokuR8(shunyu, D) {
+  const K = D.kyuyo_shotoku_r8;
+  if (!K) throw new Error('参照データに令和8年分の給与所得規則（kyuyo_shotoku_r8）がありません');
+  const s = yen(shunyu);
+  if (s < K.zero_under) return 0;
+  if (s < K.flat_upper) return s - K.flat_kojo;
+  if (s < K.hyo5_from) {
+    for (const b of K.quant_bands) {
+      if (s < b.under) return b.amount;
+    }
+  }
+  return kyuyoShotoku(s, D);
+}
+
 /** 住民税の基礎控除（地税314条の2第2項）。合計所得2,400万円以下なら43万円 */
 export function juminzeiKisoKojo(goukeiShotoku, D) {
   return pickBracket(D.juminzei_kiso_kojo.brackets, goukeiShotoku).amount;
@@ -114,8 +149,14 @@ export function juminzeiKisoKojo(goukeiShotoku, D) {
 /**
  * 所得税の基礎控除（所法86条1項＋措置法41条の16の2）。
  * ★ 住民税そのものには使わない。「人的控除差調整額」（ふるさと納税の割合の判定）にだけ要る。
+ * ★ zeisei='r8'（令和8年分・令和9年分）は改正後の表（62万円＋加算42万/5万）を使う。
+ *   データに r8 の表が無いのに r8 を頼まれたら黙って旧表で答えない（fail closed）。
  */
-export function shotokuzeiKisoKojo(goukeiShotoku, D) {
+export function shotokuzeiKisoKojo(goukeiShotoku, D, zeisei) {
+  if (zeisei === 'r8') {
+    if (!D.shotokuzei_kiso_kojo_r8) throw new Error('参照データに令和8年分の基礎控除表（shotokuzei_kiso_kojo_r8）がありません');
+    return pickBracket(D.shotokuzei_kiso_kojo_r8.brackets, goukeiShotoku).amount;
+  }
   return pickBracket(D.shotokuzei_kiso_kojo.brackets, goukeiShotoku).amount;
 }
 
@@ -228,9 +269,9 @@ export function choseiKojo(kazei, saGokei, goukeiShotoku, shiteiToshi, D) {
  * ★ 令和7年分・令和8年分は所得税の基礎控除が上乗せされている（58〜95万円）ので、
  *   この第2項が10〜47万円と大きい。ここを落とすと、特例控除額の割合の区分を1段階誤ることがある。
  */
-export function jintekiChoseiGaku(family, goukeiShotoku, D) {
+export function jintekiChoseiGaku(family, goukeiShotoku, D, zeisei) {
   const sa = jintekiSaGokei(family, goukeiShotoku, D);
-  const kiso = shotokuzeiKisoKojo(goukeiShotoku, D);
+  const kiso = shotokuzeiKisoKojo(goukeiShotoku, D, zeisei);
   return sa + Math.max(0, kiso - 480000);
 }
 
@@ -463,8 +504,12 @@ export function kintouwariGaku(jichitai, kintouwariHikazei, D) {
 export function calc(input, D) {
   if (!D) throw new Error('参照データ（juminzei_r08.json）が渡されていません');
 
+  // ★ zeisei:'r8' ＝ 令和8年分・令和9年分の所得税規則（措法29条の4＋改正後86条）で計算する。
+  //   ふるさと納税（2026年寄附→令和9年度住民税）が使う。既定は令和7年分（令和8年度住民税）。
+  const zeisei = input.zeisei === 'r8' ? 'r8' : undefined;
+
   const shunyu = yen(input.kyuyoShunyu);
-  const kyuyo = kyuyoShotoku(shunyu, D);
+  const kyuyo = zeisei === 'r8' ? kyuyoShotokuR8(shunyu, D) : kyuyoShotoku(shunyu, D);
   const sonotaShotoku = yen(input.sonotaShotoku);
   const goukei = kyuyo + sonotaShotoku; // 合計所得金額（＝総所得金額等。損失の繰越は扱わない）
 
@@ -516,7 +561,7 @@ export function calc(input, D) {
   // ── ③ 均等割＋森林環境税 ────────────────────────────────────
   const kintou = kintouwariGaku(J, hikazei.kintouwariHikazei, D);
 
-  const choseiGaku = jintekiChoseiGaku(input.family, goukei, D);
+  const choseiGaku = jintekiChoseiGaku(input.family, goukei, D, zeisei);
   const R = tokureiRitsu(kazei, choseiGaku, D);
   const { gendo, cap } = furusatoGendo(shotokuwari, R.pct_x1000, D);
 
