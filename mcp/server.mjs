@@ -7,7 +7,10 @@
  *   initialize / notifications/initialized / tools/list / tools/call / ping
  *
  * 使い方（Claude Desktop/Code の mcp 設定）:
- *   { "command": "node", "args": ["<...>/keiri-core/mcp/server.mjs"] }
+ *   { "command": "npx", "args": ["-y", "-p", "keiri-core", "keiri-core-mcp"] }
+ *   ※ bin名(keiri-core-mcp)とパッケージ名(keiri-core)が違うので `-p` が要る。
+ *      `npx -y keiri-core-mcp` は「そんなパッケージは無い」で 404 になる。
+ *   clone して使うなら { "command": "node", "args": ["<...>/keiri-core/mcp/server.mjs"] }
  *
  * 計算は keiri-core（検証済み純関数）。このサーバーは薄いラッパーで、状態も外部通信も持たない。
  * ★外部AI(ChatGPT等)向けのリモート公開は、同じ TOOLS を Cloudflare Workers(無料枠)のHTTP/SSE
@@ -114,7 +117,7 @@ function handle(req) {
     return ok(id, {
       protocolVersion: params?.protocolVersion || "2024-11-05",
       capabilities: { tools: {} },
-      serverInfo: { name: "keiri-core", version: "1.1.1" },
+      serverInfo: { name: "keiri-core", version: "1.1.2" },
       instructions: "日本の税・給与・社会保険の計算ツール（keiri-tools.com の検証済みエンジン）。金額は円。結果は概算で、個別の税務助言ではない。",
     });
   }

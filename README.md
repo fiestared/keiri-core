@@ -86,7 +86,7 @@ AIエージェント（Claude Desktop / Claude Code など）が、日本の税�
 ```json
 {
   "mcpServers": {
-    "keiri-core": { "command": "npx", "args": ["-y", "keiri-core-mcp"] }
+    "keiri-core": { "command": "npx", "args": ["-y", "-p", "keiri-core", "keiri-core-mcp"] }
   }
 }
 ```
