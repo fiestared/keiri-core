@@ -114,7 +114,7 @@ function handle(req) {
     return ok(id, {
       protocolVersion: params?.protocolVersion || "2024-11-05",
       capabilities: { tools: {} },
-      serverInfo: { name: "keiri-core", version: "1.1.0" },
+      serverInfo: { name: "keiri-core", version: "1.1.1" },
       instructions: "日本の税・給与・社会保険の計算ツール（keiri-tools.com の検証済みエンジン）。金額は円。結果は概算で、個別の税務助言ではない。",
     });
   }

@@ -1,18 +1,19 @@
 {
   "name": "keiri-core",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "日本の給与・税・社会保険の計算ロジック（DOM非依存の純関数）。手取り・社会保険料・源泉徴収・住民税・ふるさと納税・iDeCo/小規模企業共済などの節税額・相続/贈与税ほか34種。公式の計算例・保険料額表と1銭まで照合したテスト付き。keiri-tools.com の計算エンジンそのもの。",
   "type": "module",
   "license": "MIT",
   "homepage": "https://keiri-tools.com/",
   "repository": { "type": "git", "url": "git+https://github.com/fiestared/keiri-core.git" },
   "main": "index.js",
+  "bin": { "keiri-core-mcp": "mcp/server.mjs" },
   "exports": {
     ".": "./index.js",
     "./src/*": "./src/*",
     "./data/*": "./data/*"
   },
-  "files": ["index.js", "src", "data", "README.md", "LICENSE"],
+  "files": ["index.js", "src", "data", "mcp", "README.md", "LICENSE"],
   "engines": { "node": ">=18" },
   "sideEffects": false,
   "scripts": {

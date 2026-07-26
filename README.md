@@ -81,15 +81,17 @@ npm test
 ## AIエージェントから使う（MCP サーバー）
 
 AIエージェント（Claude Desktop / Claude Code など）が、日本の税・給与の計算を**ツールとして直接呼べます**。
-`mcp/server.mjs` は依存ゼロ・stdio の MCP サーバーです。設定に追加するだけ:
+本パッケージに同梱の `mcp/server.mjs` は依存ゼロ・stdio の MCP サーバーです。設定に追加するだけ:
 
 ```json
 {
   "mcpServers": {
-    "keiri-core": { "command": "node", "args": ["<path>/keiri-core/mcp/server.mjs"] }
+    "keiri-core": { "command": "npx", "args": ["-y", "keiri-core-mcp"] }
   }
 }
 ```
+
+リポジトリを clone して使う場合は `{ "command": "node", "args": ["<path>/keiri-core/mcp/server.mjs"] }`。
 
 提供ツール: `take_home_pay`（手取り）/ `income_tax`（所得税額）/ `deduction_tax_saving`（所得控除の節税額）/
 `dependent_deduction`（扶養控除）。「額面30万・東京都の手取りは？」で AI が計算して答えます（＝検証済みエンジンの値）。
