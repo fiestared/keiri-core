@@ -9,6 +9,7 @@ const __dir = dirname(fileURLToPath(import.meta.url));
 const load = (n) => JSON.parse(readFileSync(join(__dir, "data", n), "utf8"));
 export * as bonusTedori from "./src/bonus_tedori_core.js";
 export * as eigyobi from "./src/eigyobi_core.js";
+export * as fudosanShutoku from "./src/fudosan_shutoku_core.js";
 export * as genka from "./src/genka_core.js";
 export * as gensen from "./src/gensen_core.js";
 export * as gensenKyuyo from "./src/gensen_kyuyo_core.js";
