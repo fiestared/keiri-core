@@ -11,6 +11,7 @@ export * as bonusTedori from "./src/bonus_tedori_core.js";
 export * as eigyobi from "./src/eigyobi_core.js";
 export * as fudosanShutoku from "./src/fudosan_shutoku_core.js";
 export * as genka from "./src/genka_core.js";
+export * as genkaShokyaku from "./src/genka_shokyaku_core.js";
 export * as gensen from "./src/gensen_core.js";
 export * as gensenKyuyo from "./src/gensen_kyuyo_core.js";
 export * as gensenShoyo from "./src/gensen_shoyo_core.js";
@@ -67,6 +68,7 @@ export const data = {
   "shaho_rates_r08": load("shaho_rates_r08.json"),
   "shobyo_r08": load("shobyo_r08.json"),
   "shokibo_takuchi_r08": load("shokibo_takuchi_r08.json"),
+  "shokyaku_rates_r08": load("shokyaku_rates_r08.json"),
   "sozokuzei_r08": load("sozokuzei_r08.json"),
   "taishoku_rates_r08": load("taishoku_rates_r08.json"),
   "toroku_menkyo_r08": load("toroku_menkyo_r08.json"),
