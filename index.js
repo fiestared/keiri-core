@@ -11,7 +11,6 @@ export * as bonusTedori from "./src/bonus_tedori_core.js";
 export * as eigyobi from "./src/eigyobi_core.js";
 export * as fudosanShutoku from "./src/fudosan_shutoku_core.js";
 export * as genka from "./src/genka_core.js";
-export * as genkaShokyaku from "./src/genka_shokyaku_core.js";
 export * as gensen from "./src/gensen_core.js";
 export * as gensenKyuyo from "./src/gensen_kyuyo_core.js";
 export * as gensenShoyo from "./src/gensen_shoyo_core.js";
@@ -27,6 +26,7 @@ export * as juminzei from "./src/juminzei_core.js";
 export * as jutaku from "./src/jutaku_core.js";
 export * as kabe from "./src/kabe_core.js";
 export * as kihonteate from "./src/kihonteate_core.js";
+export * as kokuho from "./src/kokuho_core.js";
 export * as koteiShisanzei from "./src/kotei_shisanzei_core.js";
 export * as payday from "./src/payday_core.js";
 export * as seizenZoyo from "./src/seizen_zoyo_core.js";
@@ -63,12 +63,12 @@ export const data = {
   "jutaku_r07": load("jutaku_r07.json"),
   "kabe_thresholds_r08": load("kabe_thresholds_r08.json"),
   "kihonteate_r07": load("kihonteate_r07.json"),
+  "kokuho_r08": load("kokuho_r08.json"),
   "seizen_zoyo_r08": load("seizen_zoyo_r08.json"),
   "setsuzei_r08": load("setsuzei_r08.json"),
   "shaho_rates_r08": load("shaho_rates_r08.json"),
   "shobyo_r08": load("shobyo_r08.json"),
   "shokibo_takuchi_r08": load("shokibo_takuchi_r08.json"),
-  "shokyaku_rates_r08": load("shokyaku_rates_r08.json"),
   "sozokuzei_r08": load("sozokuzei_r08.json"),
   "taishoku_rates_r08": load("taishoku_rates_r08.json"),
   "toroku_menkyo_r08": load("toroku_menkyo_r08.json"),
