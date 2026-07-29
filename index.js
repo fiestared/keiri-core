@@ -28,7 +28,9 @@ export * as kabe from "./src/kabe_core.js";
 export * as kihonteate from "./src/kihonteate_core.js";
 export * as kokuho from "./src/kokuho_core.js";
 export * as koteiShisanzei from "./src/kotei_shisanzei_core.js";
+export * as nenkin from "./src/nenkin_core.js";
 export * as payday from "./src/payday_core.js";
+export * as saitei from "./src/saitei_core.js";
 export * as seizenZoyo from "./src/seizen_zoyo_core.js";
 export * as senpou from "./src/senpou_core.js";
 export * as setsuzei from "./src/setsuzei_core.js";
@@ -64,6 +66,8 @@ export const data = {
   "kabe_thresholds_r08": load("kabe_thresholds_r08.json"),
   "kihonteate_r07": load("kihonteate_r07.json"),
   "kokuho_r08": load("kokuho_r08.json"),
+  "nenkin_r08": load("nenkin_r08.json"),
+  "saitei_chingin_r07": load("saitei_chingin_r07.json"),
   "seizen_zoyo_r08": load("seizen_zoyo_r08.json"),
   "setsuzei_r08": load("setsuzei_r08.json"),
   "shaho_rates_r08": load("shaho_rates_r08.json"),

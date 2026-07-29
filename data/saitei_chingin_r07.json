@@ -1,0 +1,571 @@
+{
+ "_meta": {
+  "year": "令和7年度",
+  "label": "地域別最低賃金 全国一覧（令和7年度・47都道府県）と令和8年度改定の審議状況",
+  "checked": "2026-07-29",
+  "source": "厚生労働省「地域別最低賃金の全国一覧」および同ページ掲載PDF『令和７年度地域別最低賃金全国一覧』",
+  "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/",
+  "source_pdf": "https://www.mhlw.go.jp/content/11200000/001571192.pdf",
+  "verify_note": "PDFから都道府県名・時間額・改定前額・引上げ額・引上げ率・発効日を機械抽出し、抽出後に『引上げ額 = 時間額 − 改定前額』および『引上げ率 ≒ 引上げ額 ÷ 改定前額（小数第1位）』を全47件で検算して不一致ゼロを確認した。手で書き写していない。",
+  "national_average": {
+   "wage": 1121,
+   "prev": 1055,
+   "up": 66,
+   "rate": 6.3
+  }
+ },
+ "next_revision": {
+  "year": "令和8年度",
+  "status": "pending",
+  "headline": "令和8年度の引上げ額の目安は、まだ答申されていません。",
+  "detail": "中央最低賃金審議会の「目安に関する小委員会」は令和8年度の審議を2026年6月26日に始め、2026年7月28日の第6回まで開催されています。目安が答申されると、各都道府県の地方最低賃金審議会がそれを参考に金額を決め、例年10月ごろに発効します。答申が出た時点でこのページに反映します。",
+  "meetings": [
+   {
+    "n": 1,
+    "date": "2026-06-26"
+   },
+   {
+    "n": 2,
+    "date": "2026-07-10"
+   },
+   {
+    "n": 3,
+    "date": "2026-07-17"
+   },
+   {
+    "n": 4,
+    "date": "2026-07-23"
+   },
+   {
+    "n": 5,
+    "date": "2026-07-27"
+   },
+   {
+    "n": 6,
+    "date": "2026-07-28"
+   }
+  ],
+  "source": "厚生労働省 中央最低賃金審議会（目安に関する小委員会）",
+  "source_url": "https://www.mhlw.go.jp/stf/shingi/shingi-tingin_127941.html",
+  "checked": "2026-07-29"
+ },
+ "prefectures": [
+  {
+   "pref": "東京",
+   "wage": 1226,
+   "prev": 1163,
+   "up": 63,
+   "rate": 5.4,
+   "effective": "2025-10-03",
+   "effective_wa": "令和7年10月3日",
+   "full": "東京都",
+   "region": "関東"
+  },
+  {
+   "pref": "神奈川",
+   "wage": 1225,
+   "prev": 1162,
+   "up": 63,
+   "rate": 5.4,
+   "effective": "2025-10-04",
+   "effective_wa": "令和7年10月4日",
+   "full": "神奈川県",
+   "region": "関東"
+  },
+  {
+   "pref": "大阪",
+   "wage": 1177,
+   "prev": 1114,
+   "up": 63,
+   "rate": 5.7,
+   "effective": "2025-10-16",
+   "effective_wa": "令和7年10月16日",
+   "full": "大阪府",
+   "region": "近畿"
+  },
+  {
+   "pref": "埼玉",
+   "wage": 1141,
+   "prev": 1078,
+   "up": 63,
+   "rate": 5.8,
+   "effective": "2025-11-01",
+   "effective_wa": "令和7年11月1日",
+   "full": "埼玉県",
+   "region": "関東"
+  },
+  {
+   "pref": "千葉",
+   "wage": 1140,
+   "prev": 1076,
+   "up": 64,
+   "rate": 5.9,
+   "effective": "2025-10-03",
+   "effective_wa": "令和7年10月3日",
+   "full": "千葉県",
+   "region": "関東"
+  },
+  {
+   "pref": "愛知",
+   "wage": 1140,
+   "prev": 1077,
+   "up": 63,
+   "rate": 5.8,
+   "effective": "2025-10-18",
+   "effective_wa": "令和7年10月18日",
+   "full": "愛知県",
+   "region": "中部"
+  },
+  {
+   "pref": "京都",
+   "wage": 1122,
+   "prev": 1058,
+   "up": 64,
+   "rate": 6.0,
+   "effective": "2025-11-21",
+   "effective_wa": "令和7年11月21日",
+   "full": "京都府",
+   "region": "近畿"
+  },
+  {
+   "pref": "兵庫",
+   "wage": 1116,
+   "prev": 1052,
+   "up": 64,
+   "rate": 6.1,
+   "effective": "2025-10-04",
+   "effective_wa": "令和7年10月4日",
+   "full": "兵庫県",
+   "region": "近畿"
+  },
+  {
+   "pref": "静岡",
+   "wage": 1097,
+   "prev": 1034,
+   "up": 63,
+   "rate": 6.1,
+   "effective": "2025-11-01",
+   "effective_wa": "令和7年11月1日",
+   "full": "静岡県",
+   "region": "中部"
+  },
+  {
+   "pref": "三重",
+   "wage": 1087,
+   "prev": 1023,
+   "up": 64,
+   "rate": 6.3,
+   "effective": "2025-11-21",
+   "effective_wa": "令和7年11月21日",
+   "full": "三重県",
+   "region": "近畿"
+  },
+  {
+   "pref": "広島",
+   "wage": 1085,
+   "prev": 1020,
+   "up": 65,
+   "rate": 6.4,
+   "effective": "2025-11-01",
+   "effective_wa": "令和7年11月1日",
+   "full": "広島県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "滋賀",
+   "wage": 1080,
+   "prev": 1017,
+   "up": 63,
+   "rate": 6.2,
+   "effective": "2025-10-05",
+   "effective_wa": "令和7年10月5日",
+   "full": "滋賀県",
+   "region": "近畿"
+  },
+  {
+   "pref": "北海道",
+   "wage": 1075,
+   "prev": 1010,
+   "up": 65,
+   "rate": 6.4,
+   "effective": "2025-10-04",
+   "effective_wa": "令和7年10月4日",
+   "full": "北海道",
+   "region": "北海道・東北"
+  },
+  {
+   "pref": "茨城",
+   "wage": 1074,
+   "prev": 1005,
+   "up": 69,
+   "rate": 6.9,
+   "effective": "2025-10-12",
+   "effective_wa": "令和7年10月12日",
+   "full": "茨城県",
+   "region": "関東"
+  },
+  {
+   "pref": "栃木",
+   "wage": 1068,
+   "prev": 1004,
+   "up": 64,
+   "rate": 6.4,
+   "effective": "2025-10-01",
+   "effective_wa": "令和7年10月1日",
+   "full": "栃木県",
+   "region": "関東"
+  },
+  {
+   "pref": "岐阜",
+   "wage": 1065,
+   "prev": 1001,
+   "up": 64,
+   "rate": 6.4,
+   "effective": "2025-10-18",
+   "effective_wa": "令和7年10月18日",
+   "full": "岐阜県",
+   "region": "中部"
+  },
+  {
+   "pref": "群馬",
+   "wage": 1063,
+   "prev": 985,
+   "up": 78,
+   "rate": 7.9,
+   "effective": "2026-03-01",
+   "effective_wa": "令和8年3月1日",
+   "full": "群馬県",
+   "region": "関東"
+  },
+  {
+   "pref": "富山",
+   "wage": 1062,
+   "prev": 998,
+   "up": 64,
+   "rate": 6.4,
+   "effective": "2025-10-12",
+   "effective_wa": "令和7年10月12日",
+   "full": "富山県",
+   "region": "中部"
+  },
+  {
+   "pref": "長野",
+   "wage": 1061,
+   "prev": 998,
+   "up": 63,
+   "rate": 6.3,
+   "effective": "2025-10-03",
+   "effective_wa": "令和7年10月3日",
+   "full": "長野県",
+   "region": "中部"
+  },
+  {
+   "pref": "福岡",
+   "wage": 1057,
+   "prev": 992,
+   "up": 65,
+   "rate": 6.6,
+   "effective": "2025-11-16",
+   "effective_wa": "令和7年11月16日",
+   "full": "福岡県",
+   "region": "九州・沖縄"
+  },
+  {
+   "pref": "石川",
+   "wage": 1054,
+   "prev": 984,
+   "up": 70,
+   "rate": 7.1,
+   "effective": "2025-10-08",
+   "effective_wa": "令和7年10月8日",
+   "full": "石川県",
+   "region": "中部"
+  },
+  {
+   "pref": "福井",
+   "wage": 1053,
+   "prev": 984,
+   "up": 69,
+   "rate": 7.0,
+   "effective": "2025-10-08",
+   "effective_wa": "令和7年10月8日",
+   "full": "福井県",
+   "region": "中部"
+  },
+  {
+   "pref": "山梨",
+   "wage": 1052,
+   "prev": 988,
+   "up": 64,
+   "rate": 6.5,
+   "effective": "2025-12-01",
+   "effective_wa": "令和7年12月1日",
+   "full": "山梨県",
+   "region": "中部"
+  },
+  {
+   "pref": "奈良",
+   "wage": 1051,
+   "prev": 986,
+   "up": 65,
+   "rate": 6.6,
+   "effective": "2025-11-16",
+   "effective_wa": "令和7年11月16日",
+   "full": "奈良県",
+   "region": "近畿"
+  },
+  {
+   "pref": "新潟",
+   "wage": 1050,
+   "prev": 985,
+   "up": 65,
+   "rate": 6.6,
+   "effective": "2025-10-02",
+   "effective_wa": "令和7年10月2日",
+   "full": "新潟県",
+   "region": "中部"
+  },
+  {
+   "pref": "岡山",
+   "wage": 1047,
+   "prev": 982,
+   "up": 65,
+   "rate": 6.6,
+   "effective": "2025-12-01",
+   "effective_wa": "令和7年12月1日",
+   "full": "岡山県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "徳島",
+   "wage": 1046,
+   "prev": 980,
+   "up": 66,
+   "rate": 6.7,
+   "effective": "2026-01-01",
+   "effective_wa": "令和8年1月1日",
+   "full": "徳島県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "和歌山",
+   "wage": 1045,
+   "prev": 980,
+   "up": 65,
+   "rate": 6.6,
+   "effective": "2025-11-01",
+   "effective_wa": "令和7年11月1日",
+   "full": "和歌山県",
+   "region": "近畿"
+  },
+  {
+   "pref": "山口",
+   "wage": 1043,
+   "prev": 979,
+   "up": 64,
+   "rate": 6.5,
+   "effective": "2025-10-16",
+   "effective_wa": "令和7年10月16日",
+   "full": "山口県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "宮城",
+   "wage": 1038,
+   "prev": 973,
+   "up": 65,
+   "rate": 6.7,
+   "effective": "2025-10-04",
+   "effective_wa": "令和7年10月4日",
+   "full": "宮城県",
+   "region": "北海道・東北"
+  },
+  {
+   "pref": "香川",
+   "wage": 1036,
+   "prev": 970,
+   "up": 66,
+   "rate": 6.8,
+   "effective": "2025-10-18",
+   "effective_wa": "令和7年10月18日",
+   "full": "香川県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "大分",
+   "wage": 1035,
+   "prev": 954,
+   "up": 81,
+   "rate": 8.5,
+   "effective": "2026-01-01",
+   "effective_wa": "令和8年1月1日",
+   "full": "大分県",
+   "region": "九州・沖縄"
+  },
+  {
+   "pref": "熊本",
+   "wage": 1034,
+   "prev": 952,
+   "up": 82,
+   "rate": 8.6,
+   "effective": "2026-01-01",
+   "effective_wa": "令和8年1月1日",
+   "full": "熊本県",
+   "region": "九州・沖縄"
+  },
+  {
+   "pref": "福島",
+   "wage": 1033,
+   "prev": 955,
+   "up": 78,
+   "rate": 8.2,
+   "effective": "2026-01-01",
+   "effective_wa": "令和8年1月1日",
+   "full": "福島県",
+   "region": "北海道・東北"
+  },
+  {
+   "pref": "島根",
+   "wage": 1033,
+   "prev": 962,
+   "up": 71,
+   "rate": 7.4,
+   "effective": "2025-11-17",
+   "effective_wa": "令和7年11月17日",
+   "full": "島根県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "愛媛",
+   "wage": 1033,
+   "prev": 956,
+   "up": 77,
+   "rate": 8.1,
+   "effective": "2025-12-01",
+   "effective_wa": "令和7年12月1日",
+   "full": "愛媛県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "山形",
+   "wage": 1032,
+   "prev": 955,
+   "up": 77,
+   "rate": 8.1,
+   "effective": "2025-12-23",
+   "effective_wa": "令和7年12月23日",
+   "full": "山形県",
+   "region": "北海道・東北"
+  },
+  {
+   "pref": "岩手",
+   "wage": 1031,
+   "prev": 952,
+   "up": 79,
+   "rate": 8.3,
+   "effective": "2025-12-01",
+   "effective_wa": "令和7年12月1日",
+   "full": "岩手県",
+   "region": "北海道・東北"
+  },
+  {
+   "pref": "秋田",
+   "wage": 1031,
+   "prev": 951,
+   "up": 80,
+   "rate": 8.4,
+   "effective": "2026-03-31",
+   "effective_wa": "令和8年3月31日",
+   "full": "秋田県",
+   "region": "北海道・東北"
+  },
+  {
+   "pref": "長崎",
+   "wage": 1031,
+   "prev": 953,
+   "up": 78,
+   "rate": 8.2,
+   "effective": "2025-12-01",
+   "effective_wa": "令和7年12月1日",
+   "full": "長崎県",
+   "region": "九州・沖縄"
+  },
+  {
+   "pref": "鳥取",
+   "wage": 1030,
+   "prev": 957,
+   "up": 73,
+   "rate": 7.6,
+   "effective": "2025-10-04",
+   "effective_wa": "令和7年10月4日",
+   "full": "鳥取県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "佐賀",
+   "wage": 1030,
+   "prev": 956,
+   "up": 74,
+   "rate": 7.7,
+   "effective": "2025-11-21",
+   "effective_wa": "令和7年11月21日",
+   "full": "佐賀県",
+   "region": "九州・沖縄"
+  },
+  {
+   "pref": "青森",
+   "wage": 1029,
+   "prev": 953,
+   "up": 76,
+   "rate": 8.0,
+   "effective": "2025-11-21",
+   "effective_wa": "令和7年11月21日",
+   "full": "青森県",
+   "region": "北海道・東北"
+  },
+  {
+   "pref": "鹿児島",
+   "wage": 1026,
+   "prev": 953,
+   "up": 73,
+   "rate": 7.7,
+   "effective": "2025-11-01",
+   "effective_wa": "令和7年11月1日",
+   "full": "鹿児島県",
+   "region": "九州・沖縄"
+  },
+  {
+   "pref": "高知",
+   "wage": 1023,
+   "prev": 952,
+   "up": 71,
+   "rate": 7.5,
+   "effective": "2025-12-01",
+   "effective_wa": "令和7年12月1日",
+   "full": "高知県",
+   "region": "中国・四国"
+  },
+  {
+   "pref": "宮崎",
+   "wage": 1023,
+   "prev": 952,
+   "up": 71,
+   "rate": 7.5,
+   "effective": "2025-11-16",
+   "effective_wa": "令和7年11月16日",
+   "full": "宮崎県",
+   "region": "九州・沖縄"
+  },
+  {
+   "pref": "沖縄",
+   "wage": 1023,
+   "prev": 952,
+   "up": 71,
+   "rate": 7.5,
+   "effective": "2025-12-01",
+   "effective_wa": "令和7年12月1日",
+   "full": "沖縄県",
+   "region": "九州・沖縄"
+  }
+ ]
+}
