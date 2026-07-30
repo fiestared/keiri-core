@@ -8,6 +8,7 @@ import { dirname, join } from "node:path";
 const __dir = dirname(fileURLToPath(import.meta.url));
 const load = (n) => JSON.parse(readFileSync(join(__dir, "data", n), "utf8"));
 export * as bonusTedori from "./src/bonus_tedori_core.js";
+export * as chukai from "./src/chukai_core.js";
 export * as eigyobi from "./src/eigyobi_core.js";
 export * as fudosanShutoku from "./src/fudosan_shutoku_core.js";
 export * as genka from "./src/genka_core.js";
@@ -51,6 +52,7 @@ export * as zoyozei from "./src/zoyozei_core.js";
 
 /** 料率・税額表データ（コアに引数で渡す）。キーはファイル名から .json を除いたもの。 */
 export const data = {
+  "chukai_r08": load("chukai_r08.json"),
   "fee_table": load("fee_table.json"),
   "genka_rates": load("genka_rates.json"),
   "gensen_getsugaku_r08": load("gensen_getsugaku_r08.json"),
