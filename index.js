@@ -42,6 +42,7 @@ export * as shussan from "./src/shussan_core.js";
 export * as sozokuzei from "./src/sozokuzei_core.js";
 export * as taishoku from "./src/taishoku_core.js";
 export * as tedori from "./src/tedori_core.js";
+export * as torokuJutaku from "./src/toroku_jutaku_core.js";
 export * as torokuMenkyo from "./src/toroku_menkyo_core.js";
 export * as yukyu from "./src/yukyu_core.js";
 export * as zangyodai from "./src/zangyodai_core.js";
@@ -75,6 +76,7 @@ export const data = {
   "shokibo_takuchi_r08": load("shokibo_takuchi_r08.json"),
   "sozokuzei_r08": load("sozokuzei_r08.json"),
   "taishoku_rates_r08": load("taishoku_rates_r08.json"),
+  "toroku_jutaku_r08": load("toroku_jutaku_r08.json"),
   "toroku_menkyo_r08": load("toroku_menkyo_r08.json"),
   "zangyodai_rates": load("zangyodai_rates.json"),
   "zoyozei_r08": load("zoyozei_r08.json"),
