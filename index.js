@@ -47,6 +47,7 @@ export * as tedori from "./src/tedori_core.js";
 export * as torokuJutaku from "./src/toroku_jutaku_core.js";
 export * as torokuMenkyo from "./src/toroku_menkyo_core.js";
 export * as yukyu from "./src/yukyu_core.js";
+export * as zaishoku from "./src/zaishoku_core.js";
 export * as zangyodai from "./src/zangyodai_core.js";
 export * as zengin from "./src/zengin_core.js";
 export * as zoyozei from "./src/zoyozei_core.js";
@@ -82,6 +83,7 @@ export const data = {
   "taishoku_rates_r08": load("taishoku_rates_r08.json"),
   "toroku_jutaku_r08": load("toroku_jutaku_r08.json"),
   "toroku_menkyo_r08": load("toroku_menkyo_r08.json"),
+  "zaishoku_r08": load("zaishoku_r08.json"),
   "zangyodai_rates": load("zangyodai_rates.json"),
   "zoyozei_r08": load("zoyozei_r08.json"),
 };
