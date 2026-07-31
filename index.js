@@ -21,6 +21,7 @@ export * as inshi from "./src/inshi_core.js";
 export * as invoiceBangou from "./src/invoice_bangou_core.js";
 export * as iryohi from "./src/iryohi_core.js";
 export * as iryubun from "./src/iryubun_core.js";
+export * as izoku from "./src/izoku_core.js";
 export * as jidoshazei from "./src/jidoshazei_core.js";
 export * as jouto from "./src/jouto_core.js";
 export * as juminzei from "./src/juminzei_core.js";
@@ -62,6 +63,7 @@ export const data = {
   "inshi_r07": load("inshi_r07.json"),
   "iryohi_r08": load("iryohi_r08.json"),
   "iryubun_r08": load("iryubun_r08.json"),
+  "izoku_r08": load("izoku_r08.json"),
   "jidoshazei_r08": load("jidoshazei_r08.json"),
   "jouto_r08": load("jouto_r08.json"),
   "juminzei_r08": load("juminzei_r08.json"),
