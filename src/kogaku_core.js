@@ -50,14 +50,25 @@
  *    （41条1項が明文で除いている）。窓口で払った総額をそのまま入れると支給額が過大に出る。
  *
  * 10. ★**限度額の表には「使える期間」がある**（2026-08-02 追加）。高額療養費は
- *    「療養のあった月」の表で決まるので、**診療年月**で表を選ぶ（申請日でも支給日でもない）。
- *    このコアが持っているのは **令和8年7月診療分まで**（data.supported_through）の表だけ。
- *    令和8年8月診療分からは厚労省と協会けんぽが 85,800円＋1%（区分ウ）等の**別の表**を公表しており、
- *    そちらが実際に適用される（医療費100万円の月で 87,430円 → 92,940円。**5,510円ずれる**）。
- *    → **supported_through を超える診療年月には額を出さない**（supported:false / reason:"period"）。
- *    近い数字を出さないこと。新表は年間上限を同時に新設しており、月額表だけ実装すると
- *    年間上限に達した人に**払い過ぎの答え**を出す（別の黙った誤りに移るだけ）。
- *    経緯とソースは kogaku_r08.json の _meta.note_mhlw / revision_2026_08。
+ *    「療養のあった月」の表で決まるので、**診療年月で表を選ぶ**（申請日でも支給日でもない）。
+ *    このコアは表を2つ持っている（data.tables）: ～令和8年7月診療分 と 令和8年8月～令和9年7月診療分。
+ *    区分ウ・医療費100万円の月で 87,430円 と 92,940円（**5,510円**）違うので、取り違えると黙って間違える。
+ *    **診療年月が無い／data.supported_through（令和9年7月）を超える場合は額を出さない**
+ *    （supported:false / reason:"no_shinryo_ym" | "period"）。近い数字を出さないこと。
+ *    ★令和9年8月診療分からは所得区分が5段階→13段階に細分化される（kogaku_r08.json の
+ *    revision_2027_08）。**境界だけ流用して supported_through を延ばしてはいけない**
+ *    （標報44万円の人に 85,800＋1% と答える。正しくは 110,400＋1%）。
+ *
+ * 11. ★**年間上限（令和8年8月新設）は月額の限度額を下げない**（2026-08-02 追加）。
+ *    年間上限は「窓口で引かれる」仕組みではなく、**1年（8月診療分〜翌年7月診療分）が終わったあとに
+ *    保険者へ申請して、超えた分が償還払いされる**もの（協会けんぽの「年間の高額療養費支給申請書兼
+ *    自己負担額証明書交付申請書」／標報15万円以下の区分は「令和9年8月以降に償還払い」と明記／
+ *    先行する70歳以上の外来年間合算も「7月31日を基準日として…事後的に償還払い」）。
+ *    → **その月の限度額の計算に年間上限を混ぜてはいけない**（混ぜると窓口で払う額を過小に答える）。
+ *    → 逆に、**年間上限の存在を画面に出さないのも不足**（申請しないと戻らない金がある）。
+ *    このコアは額と期間の区切りを `annual` として返すだけで、**利用者の年間累計は計算しない**
+ *    （合計を数える単位が世帯か個人か、対象になる自己負担の範囲を一次情報でまだ読めていないため。
+ *    kogaku_r08.json の annual.unverified）。
  */
 
 /** "YYYY-MM" として比較可能か（診療年月。文字列比較で足りるのでTZに依存しない） */
@@ -71,21 +82,73 @@ export function roundPercentPart(x) {
 }
 
 /**
+ * 診療年月に適用される限度額の表を選ぶ（10）。
+ * @param {string} shinryoYM "YYYY-MM"
+ * @param {object} data kogaku_r08.json
+ * @returns {object|null} data.tables の要素。該当が無ければ null（＝答えない）
+ */
+export function tableFor(shinryoYM, data) {
+  if (!isYearMonth(shinryoYM)) return null;
+  const hit = (data.tables || []).filter(
+    (t) => (!t.applies_from || shinryoYM >= t.applies_from) &&
+           (!t.applies_through || shinryoYM <= t.applies_through)
+  );
+  // 期間が重なる表を置いてしまったら、どちらを使うか黙って決めない
+  return hit.length === 1 ? hit[0] : null;
+}
+
+/**
  * 区分を決める。
  * @param {object} p
  * @param {boolean} p.hikazei  市町村民税非課税者か（エより優先する）
  * @param {number|null} p.standardMonthly 療養のあった月の標準報酬月額（円）
- * @param {object} data kogaku_r08.json
+ * @param {object} table tableFor() が返した表（data ではない）
  * @returns {{key,label,item,criteria,base,threshold,rate,tasukai}|null}
  */
-export function classify({ hikazei, standardMonthly }, data) {
-  const by = (k) => data.kubun.find((x) => x.key === k) || null;
+export function classify({ hikazei, standardMonthly }, table) {
+  const by = (k) => (table.kubun || []).find((x) => x.key === k) || null;
   if (hikazei) return by("o");
   if (!(standardMonthly > 0)) return null;   // 分からないものを黙ってウに落とさない
   if (standardMonthly >= 830000) return by("a");
   if (standardMonthly >= 530000) return by("i");
   if (standardMonthly >= 280000) return by("u");
   return by("e");
+}
+
+/**
+ * その区分の年間上限（11）。**月額の限度額には影響しない**（償還払い）。
+ * @param {string} kubunKey
+ * @param {number|null} standardMonthly 区分エの軽減判定（標報15万円以下→41万円）に使う
+ * @param {string} shinryoYM 年間上限は令和8年8月診療分から。それ以前は null を返す
+ * @param {object} data kogaku_r08.json
+ */
+export function annualCapFor(kubunKey, standardMonthly, shinryoYM, data) {
+  const a = data.annual;
+  if (!a || !isYearMonth(shinryoYM) || shinryoYM < a.applies_from) return null;
+  const row = (a.caps || []).find((c) => c.key === kubunKey);
+  if (!row) return null;
+  const reduced = row.reduced_cap != null && standardMonthly != null &&
+                  standardMonthly <= row.reduced_if_std_max;
+  return {
+    cap: reduced ? row.reduced_cap : row.cap,
+    reduced,
+    reducedNote: reduced ? row.reduced_note : null,
+    // その年の区切り（8月診療分〜翌年7月診療分）。診療年月がどの期間に入るかで決まる
+    period: annualPeriodOf(shinryoYM, a.period_start_month),
+    settlement: a.settlement,
+    settlementNote: a.settlement_note,
+    periodNote: a.period_note,
+  };
+}
+
+/** 年間上限の1年（8月〜翌7月）のうち、その診療年月が属する期間を返す */
+export function annualPeriodOf(shinryoYM, startMonth) {
+  const y = Number(shinryoYM.slice(0, 4));
+  const m = Number(shinryoYM.slice(5, 7));
+  const from = m >= startMonth ? y : y - 1;
+  const pad = (n) => String(n).padStart(2, "0");
+  const endMonth = startMonth === 1 ? 12 : startMonth - 1;
+  return { from: `${from}-${pad(startMonth)}`, through: `${from + 1}-${pad(endMonth)}` };
 }
 
 /**
@@ -131,21 +194,18 @@ export function calcKogaku(input, data) {
     };
   }
   if (data.supported_through && shinryoYM > data.supported_through) {
-    const rev = data.revision_2026_08 || {};
+    const [sy, sm] = data.supported_through.split("-");
     return {
       supported: false,
       reason: "period",
       shinryoYM,
       supportedThrough: data.supported_through,
       message:
-        `この計算機が持っている自己負担限度額の表は${data.supported_through.replace("-", "年")}月診療分までです。` +
-        "令和8年8月診療分からは、厚生労働省と全国健康保険協会が" +
-        "70歳未満の限度額を 270,300／179,100／85,800／61,500／36,900円（＋新設の「年間上限」）と" +
-        "公表しており、旧い表で計算すると実際より低い限度額をお見せすることになります" +
-        "（区分ウ・医療費100万円の月で 87,430円 と 92,940円 の差）。" +
-        "近い数字をお出しすることはせず、計算を止めています。" +
-        "8月以降の診療分は、加入先の健康保険（協会けんぽの「高額療養費について」など）でご確認ください。",
-      newTable: rev.kubun || null,
+        `この計算機が持っている自己負担限度額の表は${sy}年${Number(sm)}月診療分までです。` +
+        "令和9年8月診療分からは、70歳未満の所得区分が5段階から13段階に細分化され" +
+        "（標準報酬月額 44万〜50万円は 110,400円＋1％、36万〜41万円は 98,100円＋1％ など）、" +
+        "いまの区分の切り方では答えられません。近い数字をお出しすることはせず、計算を止めています。" +
+        "加入先の健康保険（協会けんぽの「高額療養費について」など）でご確認ください。",
     };
   }
 
@@ -162,7 +222,20 @@ export function calcKogaku(input, data) {
     };
   }
 
-  const kubun = classify({ hikazei, standardMonthly }, data);
+  // 10. 診療年月に適用される表を選ぶ。選べなければ答えない（黙ってどちらかを使わない）
+  const table = tableFor(shinryoYM, data);
+  if (!table) {
+    return {
+      supported: false,
+      reason: "no_table",
+      shinryoYM,
+      message:
+        `${shinryoYM} の診療分に適用される自己負担限度額の表を、この計算機は持っていません。` +
+        "限度額は「療養のあった月」の表で決まるため、近い期間の表で代用することはせず、計算を止めています。",
+    };
+  }
+
+  const kubun = classify({ hikazei, standardMonthly }, table);
   if (!kubun) {
     return {
       supported: true,
@@ -199,9 +272,14 @@ export function calcKogaku(input, data) {
   const limitIfTasukai = kubun.tasukai;
   const limitNormal = limitFor(kubun, totalMedical, false);
 
+  // 11. 年間上限は**この月の限度額に影響しない**（償還払い）。額と期間を添えるだけ。
+  const annual = annualCapFor(kubun.key, standardMonthly, shinryoYM, data);
+
   return {
     supported: true,
     determined: true,
+    table: { id: table.id, label: table.label, appliesFrom: table.applies_from, appliesThrough: table.applies_through },
+    annual,
     kubun,
     rows,
     counted,
