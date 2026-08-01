@@ -29,6 +29,7 @@ export * as juminzei from "./src/juminzei_core.js";
 export * as jutaku from "./src/jutaku_core.js";
 export * as kabe from "./src/kabe_core.js";
 export * as kihonteate from "./src/kihonteate_core.js";
+export * as kogaku from "./src/kogaku_core.js";
 export * as kokuho from "./src/kokuho_core.js";
 export * as koteiShisanzei from "./src/kotei_shisanzei_core.js";
 export * as nenkin from "./src/nenkin_core.js";
@@ -74,6 +75,7 @@ export const data = {
   "jutaku_r07": load("jutaku_r07.json"),
   "kabe_thresholds_r08": load("kabe_thresholds_r08.json"),
   "kihonteate_r07": load("kihonteate_r07.json"),
+  "kogaku_r08": load("kogaku_r08.json"),
   "kokuho_r08": load("kokuho_r08.json"),
   "nenkin_r08": load("nenkin_r08.json"),
   "saitei_chingin_r07": load("saitei_chingin_r07.json"),
