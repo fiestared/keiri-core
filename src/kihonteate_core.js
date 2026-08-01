@@ -139,10 +139,29 @@ export function benefitDaily(w, age, D) {
 }
 
 /**
+ * 離職理由のキーが REASONS に実在することを確かめる。
+ *
+ * ★ なぜ要るか（2026-08-01に実害）: 以前の `prescribedDays` は未知のキーを黙って
+ *   「一般の受給資格者」として扱っていた（`TOKUTEI.has(不明)` が false になるだけ）。
+ *   そのため検査が `"company"`（正しくは `"kaisha"`）と書き間違えていたのに**緑のまま通り**、
+ *   45歳・会社都合・20年以上を **330日ではなく150日**として記事の実額を計算していた。
+ *   **知らない離職理由は、いちばん給付が薄い側に倒れる**＝黙って過少に答える向きに壊れる。
+ *   → 未知のキーは受け取らない（fail closed）。呼び出し側の書き間違いをその場で落とす。
+ */
+function assertReason(reason) {
+  if (!Object.prototype.hasOwnProperty.call(REASONS, reason)) {
+    throw new Error(
+      `離職理由のキー "${reason}" は存在しません。REASONS のキー（${Object.keys(REASONS).join(" / ")}）のいずれかを渡してください。`,
+    );
+  }
+}
+
+/**
  * 所定給付日数（22条・23条・附則4条）。
  * 就職困難者（22条2項）は離職理由に関係なくこちらが優先される（23条は22条2項の受給資格者を除く）。
  */
 export function prescribedDays(age, period, reason, konnan) {
+  assertReason(reason);
   if (konnan) {
     if (period === "under1") return 150;
     return age < 45 ? 300 : 360;
@@ -157,6 +176,7 @@ export function prescribedDays(age, period, reason, konnan) {
  * - 23条1項2号イ（特定受給資格者・45〜59歳・20年以上＝330日）… 1年＋30日
  */
 export function receivePeriodDays(age, period, reason, konnan) {
+  assertReason(reason);
   if (konnan && age >= 45 && age < 65 && period !== "under1") return 365 + 60;
   if (TOKUTEI.has(reason) && age >= 45 && age < 60 && period === "y20") return 365 + 30;
   return 365;
@@ -172,6 +192,7 @@ export function receivePeriodDays(age, period, reason, konnan) {
  * ★ 法律のほうで変わったのは「教育訓練を受けた場合は給付制限をかけない」という但し書き（33条1項2号・3号）。
  */
 export function restrictionMonths(reason, repeated, training) {
+  assertReason(reason);
   if (reason !== "jiko") return 0;
   if (training) return 0; // 33条1項ただし書2号・3号
   return repeated ? 3 : 1;
@@ -179,6 +200,7 @@ export function restrictionMonths(reason, repeated, training) {
 
 /** 13条: 受給資格。自己都合・定年は「離職前2年に被保険者期間12か月」、それ以外は「1年に6か月」 */
 export function eligibility(period, reason) {
+  assertReason(reason);
   const relaxed = RELAXED.has(reason);
   if (period === "under1" && !relaxed) {
     return {
