@@ -41,10 +41,14 @@
  * 7. **区分ウは「ア・イ・エ・オ以外」という catch-all**（1項1号）。
  *    標準報酬月額が分からない人を黙ってウに落とさないこと（このコアは区分を必ず明示的に決める）。
  *
- * 8. **70歳以上はこのコアの対象外**。施行令42条3項（世帯単位）と5項（外来だけの個人単位）で
- *    表が全く別で、外来には年間上限もある。→ supported:false を返して**額を出さない**（fail closed）。
- *    「70歳未満の表で近い数字を出す」ことは絶対にしない（区分ウの人なら80,100円と57,600円で
- *    22,500円ずれる。しかも70歳以上の一般区分には外来だけの18,000円という別の上限がある）。
+ * 8. **70歳以上は表も計算の順序も別**（2026-08-02 第5便で実装。それまでは fail closed だった）。
+ *    施行令42条3項（世帯単位＝入院を含む）と5項（外来だけを個人ごとに見る上限）の**二段階**で、
+ *    ①個人ごとの外来を外来上限で頭打ち → ②その後の外来分＋入院分を世帯合算して世帯上限で頭打ち。
+ *    → calcOver70()。**70歳未満の表を当てはめない**（区分ウの人なら80,100円と57,600円で22,500円ずれる）。
+ *    ★**21,000円の足切りは70歳未満だけ**の規律で、70歳以上は自己負担額をすべて合算できる（協会けんぽ）。
+ *    流用すると少額の受診が全部こぼれて支給額を過小に答える。
+ *    ★**現役並みかどうかを標準報酬月額だけで決めない**（over70.genekinami_note）。
+ *    標報28万円以上でも収入要件（520万円未満／1人世帯383万円未満）で一般扱いになる人がいる。
  *
  * 9. **食事療養・生活療養の自己負担と、保険がきかない費用（差額ベッド等）は入らない**
  *    （41条1項が明文で除いている）。窓口で払った総額をそのまま入れると支給額が過大に出る。
@@ -158,11 +162,178 @@ export function annualPeriodOf(shinryoYM, startMonth) {
  * @param {boolean} tasukai 多数回該当か（直近12か月で4回目以降）
  */
 export function limitFor(kubun, totalMedical, tasukai) {
-  if (tasukai) return kubun.tasukai;
+  // ★tasukai が null の区分がある（70歳以上の低所得者Ⅰなど。施行令42条3項6号にただし書が無い）。
+  //   そこで多数回該当を選ばれても限度額は下がらない。null を返して NaN を撒かないこと。
+  if (tasukai && kubun.tasukai != null) return kubun.tasukai;
   if (!kubun.threshold) return kubun.base;          // 区分エ・オは定額（1%部分が無い）
   // ★条文の「その額が◯円に満たないときは、◯円」＝ excess は負にならない
   const excess = Math.max(0, totalMedical - kubun.threshold);
   return kubun.base + roundPercentPart(excess * kubun.rate);
+}
+
+/* ============================ 70歳以上（施行令42条3項・5項） ============================ */
+
+/** 診療年月に適用される70歳以上の表を選ぶ。該当が無ければ null（＝答えない） */
+export function tableFor70(shinryoYM, data) {
+  if (!isYearMonth(shinryoYM)) return null;
+  const t70 = (data.over70 && data.over70.tables) || [];
+  const hit = t70.filter(
+    (t) => (!t.applies_from || shinryoYM >= t.applies_from) &&
+           (!t.applies_through || shinryoYM <= t.applies_through)
+  );
+  return hit.length === 1 ? hit[0] : null;
+}
+
+/**
+ * 70歳以上の区分を決める。
+ * ★現役並みかどうかは**標準報酬月額だけでは決まらない**（over70.genekinami_note）。
+ *   標報28万円以上でも収入要件（520万円未満・1人世帯383万円未満）で一般扱いになる人がいるので、
+ *   incomeKind を画面から受け取る。標報から自動で現役並みに落とさない。
+ * @param {"genekinami"|"ippan"|"teishotoku2"|"teishotoku1"} incomeKind
+ * @param {number|null} standardMonthly 現役並みのときだけ使う（3区分の切り分け）
+ */
+export function classify70({ incomeKind, standardMonthly }, table) {
+  const by = (k) => (table.kubun || []).find((x) => x.key === k) || null;
+  if (incomeKind === "teishotoku1") return by("teishotoku1");
+  if (incomeKind === "teishotoku2") return by("teishotoku2");
+  if (incomeKind === "ippan") return by("ippan");
+  if (incomeKind === "genekinami") {
+    if (!(standardMonthly > 0)) return null;        // 分からないものを黙ってどれかに落とさない
+    if (standardMonthly >= 830000) return by("genekinami3");
+    if (standardMonthly >= 530000) return by("genekinami2");
+    return by("genekinami1");
+  }
+  return null;
+}
+
+/** 70歳以上の年間上限（世帯・外来）。**その月の限度額には影響しない**（償還払い） */
+export function annualCapFor70(kubun, standardMonthly, shinryoYM, data) {
+  const hasHousehold = kubun.household_annual != null;
+  const hasGairai = kubun.gairai_annual != null;
+  if (!hasHousehold && !hasGairai) return null;
+  const reduced = kubun.household_annual_reduced != null && standardMonthly != null &&
+                  standardMonthly <= kubun.household_annual_reduced_if_std_max;
+  return {
+    household: hasHousehold ? (reduced ? kubun.household_annual_reduced : kubun.household_annual) : null,
+    householdReduced: reduced,
+    householdReducedNote: reduced ? kubun.household_annual_reduced_note : null,
+    gairai: hasGairai ? kubun.gairai_annual : null,
+    period: annualPeriodOf(shinryoYM, 8),           // 施行令41条の2「毎年八月一日から翌年七月三十一日までの期間」
+    settlement: "retrospective",
+    settlementNote: (data.over70 && data.over70.annual_note) || null,
+  };
+}
+
+/**
+ * 高額療養費（70歳以上）を計算する。**二段階**（over70.structure_note）:
+ *   ① 外来（通院）だけを**個人ごと**に見て、その人の外来自己負担を外来上限で頭打ちにする（5項）
+ *   ② ①の後の外来分と入院分を**世帯で合算**し、世帯上限で頭打ちにする（3項）
+ * 現役並み所得者には外来特例が無い（gairai=null）ので①を飛ばす。
+ * ★70歳未満と違い、**21,000円の足切りは無い**（自己負担額をすべて合算できる）。
+ */
+function calcOver70(input, data) {
+  const { shinryoYM, incomeKind = null, standardMonthly = null, tasukai = false, items = [] } = input;
+
+  const table = tableFor70(shinryoYM, data);
+  if (!table) {
+    return {
+      supported: false,
+      reason: "no_table70",
+      shinryoYM,
+      message:
+        `${shinryoYM} の診療分に適用される70歳以上の自己負担限度額の表を、この計算機は持っていません。` +
+        "近い期間の表で代用することはせず、計算を止めています。",
+    };
+  }
+
+  const kubun = classify70({ incomeKind, standardMonthly }, table);
+  if (!kubun) {
+    return {
+      supported: true,
+      determined: false,
+      reason: incomeKind === "genekinami" ? "no_standard_monthly" : "no_income_kind",
+      message:
+        incomeKind === "genekinami"
+          ? "現役並み所得者の限度額は3つに分かれます（標準報酬月額 83万円以上／53万〜79万円／28万〜50万円）。" +
+            "療養のあった月の標準報酬月額を入力してください。"
+          : "70歳以上の区分（現役並み所得者／一般／低所得者Ⅱ／低所得者Ⅰ）を選んでください。" +
+            "区分によって限度額が 15,700円から 270,300円＋1％まで大きく変わるため、推測では計算しません。",
+    };
+  }
+
+  // 行を作る。★70歳以上は足切りが無いので、全ての行が合算対象になる
+  const rows = items
+    .filter((it) => Number(it.medical) > 0)
+    .map((it) => {
+      const medical = Math.round(Number(it.medical));
+      const ratio = Number(it.ratio);
+      const self = Math.round(medical * ratio);
+      const kind = it.kind === "nyuin" ? "nyuin" : "gairai";   // 既定は外来
+      const person = it.person || "本人";
+      return { label: it.label || "", person, kind, medical, ratio, self };
+    });
+
+  const totalSelf = rows.reduce((s, r) => s + r.self, 0);
+  const totalMedical = rows.reduce((s, r) => s + r.medical, 0);
+
+  // ① 外来（個人ごと）の頭打ち。現役並みは外来特例が無いので飛ばす
+  const gairaiLimit = kubun.gairai;
+  const persons = [];
+  let gairaiRefund = 0;
+  if (gairaiLimit != null) {
+    const names = [];
+    rows.forEach((r) => { if (r.kind === "gairai" && !names.includes(r.person)) names.push(r.person); });
+    names.forEach((name) => {
+      const mine = rows.filter((r) => r.kind === "gairai" && r.person === name);
+      const before = mine.reduce((s, r) => s + r.self, 0);
+      const after = Math.min(before, gairaiLimit);
+      gairaiRefund += before - after;
+      persons.push({ person: name, gairaiSelf: before, gairaiCapped: after, refund: before - after, capped: before > after });
+    });
+  }
+
+  // ② 世帯合算（①の後の外来分＋入院分）
+  const nyuinSelf = rows.filter((r) => r.kind === "nyuin").reduce((s, r) => s + r.self, 0);
+  const gairaiSelfRaw = rows.filter((r) => r.kind === "gairai").reduce((s, r) => s + r.self, 0);
+  const gairaiSelfCapped = gairaiLimit != null ? gairaiSelfRaw - gairaiRefund : gairaiSelfRaw;
+  const householdBase = gairaiSelfCapped + nyuinSelf;
+
+  // 多数回該当が無い区分がある（低所得者Ⅰ等）。黙って据え置かず、申告する
+  const tasukaiAvailable = kubun.tasukai != null;
+  const tasukaiApplied = tasukai && tasukaiAvailable;
+  const limit = limitFor(kubun, totalMedical, tasukaiApplied);
+  const householdRefund = Math.max(0, householdBase - limit);
+
+  const annual = annualCapFor70(kubun, standardMonthly, shinryoYM, data);
+
+  return {
+    supported: true,
+    determined: true,
+    ageGroup: "over70",
+    table: { id: table.id, label: table.label, appliesFrom: table.applies_from, appliesThrough: table.applies_through },
+    kubun,
+    annual,
+    rows,
+    persons,
+    gairaiLimit,
+    gairaiSelfRaw,
+    gairaiSelfCapped,
+    gairaiRefund,
+    nyuinSelf,
+    householdBase,
+    totalMedical,
+    totalSelf,
+    limit,
+    householdRefund,
+    refund: gairaiRefund + householdRefund,
+    tasukai,
+    tasukaiAvailable,
+    tasukaiApplied,
+    limitNormal: limitFor(kubun, totalMedical, false),
+    limitIfTasukai: kubun.tasukai,
+    // 手元に残る負担＝世帯上限で頭打ちにした後の額
+    finalBurden: Math.min(householdBase, limit),
+  };
 }
 
 /**
@@ -209,18 +380,8 @@ export function calcKogaku(input, data) {
     };
   }
 
-  // 8. 70歳以上は表が別。額を出さない（fail closed）
-  if (ageGroup === "over70") {
-    return {
-      supported: false,
-      reason: "over70",
-      message:
-        "70歳以上の方は自己負担限度額の表が別です（健康保険法施行令42条3項・5項）。" +
-        "世帯単位の限度額に加えて、外来だけを個人ごとに見る上限と、その年間の上限があり、" +
-        "70歳未満の表を当てはめると誤った額になります。このツールはまだ70歳以上に対応していないため、" +
-        "額を出していません。加入先の健康保険にご確認ください。",
-    };
-  }
+  // 8. 70歳以上は表も計算の順序も別（施行令42条3項・5項）。専用の関数へ渡す。
+  if (ageGroup === "over70") return calcOver70(input, data);
 
   // 10. 診療年月に適用される表を選ぶ。選べなければ答えない（黙ってどちらかを使わない）
   const table = tableFor(shinryoYM, data);
