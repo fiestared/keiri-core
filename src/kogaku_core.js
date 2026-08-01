@@ -48,7 +48,22 @@
  *
  * 9. **食事療養・生活療養の自己負担と、保険がきかない費用（差額ベッド等）は入らない**
  *    （41条1項が明文で除いている）。窓口で払った総額をそのまま入れると支給額が過大に出る。
+ *
+ * 10. ★**限度額の表には「使える期間」がある**（2026-08-02 追加）。高額療養費は
+ *    「療養のあった月」の表で決まるので、**診療年月**で表を選ぶ（申請日でも支給日でもない）。
+ *    このコアが持っているのは **令和8年7月診療分まで**（data.supported_through）の表だけ。
+ *    令和8年8月診療分からは厚労省と協会けんぽが 85,800円＋1%（区分ウ）等の**別の表**を公表しており、
+ *    そちらが実際に適用される（医療費100万円の月で 87,430円 → 92,940円。**5,510円ずれる**）。
+ *    → **supported_through を超える診療年月には額を出さない**（supported:false / reason:"period"）。
+ *    近い数字を出さないこと。新表は年間上限を同時に新設しており、月額表だけ実装すると
+ *    年間上限に達した人に**払い過ぎの答え**を出す（別の黙った誤りに移るだけ）。
+ *    経緯とソースは kogaku_r08.json の _meta.note_mhlw / revision_2026_08。
  */
+
+/** "YYYY-MM" として比較可能か（診療年月。文字列比較で足りるのでTZに依存しない） */
+export function isYearMonth(s) {
+  return typeof s === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(s);
+}
 
 /** 1%部分の端数処理: 50銭未満は切り捨て、50銭以上は1円に切り上げる（施行令42条1項各号かっこ書き） */
 export function roundPercentPart(x) {
@@ -92,6 +107,7 @@ export function limitFor(kubun, totalMedical, tasukai) {
  *
  * @param {object} input
  * @param {"under70"|"over70"} input.ageGroup
+ * @param {string} input.shinryoYM               ★療養のあった年月 "YYYY-MM"（必須。表の期間判定に使う）
  * @param {boolean} input.hikazei                市町村民税非課税者か
  * @param {number|null} input.standardMonthly    標準報酬月額（円）
  * @param {boolean} input.tasukai                多数回該当か
@@ -100,7 +116,38 @@ export function limitFor(kubun, totalMedical, tasukai) {
  * @param {object} data kogaku_r08.json
  */
 export function calcKogaku(input, data) {
-  const { ageGroup, hikazei = false, standardMonthly = null, tasukai = false, items = [] } = input;
+  const { ageGroup, hikazei = false, standardMonthly = null, tasukai = false, items = [], shinryoYM = null } = input;
+
+  // 10. 診療年月が無い／表の期間を超えている場合は額を出さない（fail closed）。
+  //     ★診療年月を省略したときに「とりあえず手元の表で計算」してはいけない。
+  //     それは利用者が8月の入院を入れたときに黙って旧額を返す経路そのもの。
+  if (!isYearMonth(shinryoYM)) {
+    return {
+      supported: false,
+      reason: "no_shinryo_ym",
+      message:
+        "自己負担限度額は「療養のあった月」の表で決まるため、診療年月（YYYY-MM）が要ります。" +
+        "診療を受けた年月を指定してください。",
+    };
+  }
+  if (data.supported_through && shinryoYM > data.supported_through) {
+    const rev = data.revision_2026_08 || {};
+    return {
+      supported: false,
+      reason: "period",
+      shinryoYM,
+      supportedThrough: data.supported_through,
+      message:
+        `この計算機が持っている自己負担限度額の表は${data.supported_through.replace("-", "年")}月診療分までです。` +
+        "令和8年8月診療分からは、厚生労働省と全国健康保険協会が" +
+        "70歳未満の限度額を 270,300／179,100／85,800／61,500／36,900円（＋新設の「年間上限」）と" +
+        "公表しており、旧い表で計算すると実際より低い限度額をお見せすることになります" +
+        "（区分ウ・医療費100万円の月で 87,430円 と 92,940円 の差）。" +
+        "近い数字をお出しすることはせず、計算を止めています。" +
+        "8月以降の診療分は、加入先の健康保険（協会けんぽの「高額療養費について」など）でご確認ください。",
+      newTable: rev.kubun || null,
+    };
+  }
 
   // 8. 70歳以上は表が別。額を出さない（fail closed）
   if (ageGroup === "over70") {
