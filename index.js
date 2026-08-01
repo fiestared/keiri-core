@@ -33,6 +33,7 @@ export * as kokuho from "./src/kokuho_core.js";
 export * as koteiShisanzei from "./src/kotei_shisanzei_core.js";
 export * as nenkin from "./src/nenkin_core.js";
 export * as payday from "./src/payday_core.js";
+export * as saishushoku from "./src/saishushoku_core.js";
 export * as saitei from "./src/saitei_core.js";
 export * as seizenZoyo from "./src/seizen_zoyo_core.js";
 export * as senpou from "./src/senpou_core.js";
