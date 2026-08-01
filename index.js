@@ -13,6 +13,7 @@ export * as eigyobi from "./src/eigyobi_core.js";
 export * as fudosanShutoku from "./src/fudosan_shutoku_core.js";
 export * as genka from "./src/genka_core.js";
 export * as gensen from "./src/gensen_core.js";
+export * as gensenKojoCheck from "./src/gensen_kojo_check_core.js";
 export * as gensenKyuyo from "./src/gensen_kyuyo_core.js";
 export * as gensenShoyo from "./src/gensen_shoyo_core.js";
 export * as hikazeiSetai from "./src/hikazei_setai_core.js";
@@ -58,6 +59,7 @@ export const data = {
   "fee_table": load("fee_table.json"),
   "genka_rates": load("genka_rates.json"),
   "gensen_getsugaku_r08": load("gensen_getsugaku_r08.json"),
+  "gensen_kojo_r07": load("gensen_kojo_r07.json"),
   "gensen_shoyo_r08": load("gensen_shoyo_r08.json"),
   "hikazei_setai_r08": load("hikazei_setai_r08.json"),
   "holidays_jp": load("holidays_jp.json"),
