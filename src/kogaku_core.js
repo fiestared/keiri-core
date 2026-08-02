@@ -55,13 +55,20 @@
  *
  * 10. ★**限度額の表には「使える期間」がある**（2026-08-02 追加）。高額療養費は
  *    「療養のあった月」の表で決まるので、**診療年月で表を選ぶ**（申請日でも支給日でもない）。
- *    このコアは表を2つ持っている（data.tables）: ～令和8年7月診療分 と 令和8年8月～令和9年7月診療分。
+ *    このコアは表を3つ持っている（data.tables）: ～令和8年7月診療分 / 令和8年8月～令和9年7月 /
+ *    令和9年8月～（13区分・予定）。
  *    区分ウ・医療費100万円の月で 87,430円 と 92,940円（**5,510円**）違うので、取り違えると黙って間違える。
- *    **診療年月が無い／data.supported_through（令和9年7月）を超える場合は額を出さない**
+ *    **診療年月が無い／data.supported_through を超える場合は額を出さない**
  *    （supported:false / reason:"no_shinryo_ym" | "period"）。近い数字を出さないこと。
- *    ★令和9年8月診療分からは所得区分が5段階→13段階に細分化される（kogaku_r08.json の
- *    revision_2027_08）。**境界だけ流用して supported_through を延ばしてはいけない**
- *    （標報44万円の人に 85,800＋1% と答える。正しくは 110,400＋1%）。
+ *    ★**区分の境界をこの関数に書かない**（2026-08-02）。令和9年8月から所得区分が5段階→13段階に
+ *    細分化され、標報の刻みが全く別の切り方になる。境界を関数に持つと、表を足したときに
+ *    標報44万円の人へ 85,800＋1% と答える（正しくは 110,400＋1%）。
+ *    → classify() は**表の各区分が持つ std_min／std_max の半開区間**で引く。表が増えても関数は変えない。
+ *
+ * 10b. ★**まだ政令で確認できていない表は「予定」と申告する**（2026-08-02）。
+ *    令和9年8月からの13区分は厚労省が公表した見直し後の表で、e-Gov の施行令にはまだ無い
+ *    （table.enacted === false）。額は出すが、結果に `planned:true` を立てて画面で断らせる。
+ *    **黙って確定額として出さないこと**（同種の見直しが撤回・延期された前例がある）。
  *
  * 11. ★**年間上限（令和8年8月新設）は月額の限度額を下げない**（2026-08-02 追加）。
  *    年間上限は「窓口で引かれる」仕組みではなく、**1年（8月診療分〜翌年7月診療分）が終わったあとに
@@ -110,13 +117,21 @@ export function tableFor(shinryoYM, data) {
  * @returns {{key,label,item,criteria,base,threshold,rate,tasukai}|null}
  */
 export function classify({ hikazei, standardMonthly }, table) {
-  const by = (k) => (table.kubun || []).find((x) => x.key === k) || null;
-  if (hikazei) return by("o");
-  if (!(standardMonthly > 0)) return null;   // 分からないものを黙ってウに落とさない
-  if (standardMonthly >= 830000) return by("a");
-  if (standardMonthly >= 530000) return by("i");
-  if (standardMonthly >= 280000) return by("u");
-  return by("e");
+  const kubun = table.kubun || [];
+  // 非課税の区分は標準報酬月額にかかわらず優先する（施行令42条1項4号「次号に掲げる者を除く」）。
+  // ★この行は std_min/std_max を持たないので、下の区間検索からは必ず外す（外さないと全員に当たる）。
+  const hikazeiRow = kubun.find((x) => x.hikazei === true) || null;
+  if (hikazei) return hikazeiRow;
+  if (!(standardMonthly > 0)) return null;   // 分からないものを黙って真ん中の区分に落とさない
+
+  // 10. 境界は表の側（std_min 以上・std_max 未満の半開区間）。関数に境界を書かない。
+  const hit = kubun.filter(
+    (x) => x.hikazei !== true &&
+           (x.std_min == null || standardMonthly >= x.std_min) &&
+           (x.std_max == null || standardMonthly < x.std_max)
+  );
+  // 区間が重なる／どこにも当たらない表を置いてしまったら、どれを使うか黙って決めない
+  return hit.length === 1 ? hit[0] : null;
 }
 
 /**
@@ -310,7 +325,10 @@ function calcOver70(input, data) {
     supported: true,
     determined: true,
     ageGroup: "over70",
-    table: { id: table.id, label: table.label, appliesFrom: table.applies_from, appliesThrough: table.applies_through },
+    // 10b. enacted === false の表（＝公表されただけで政令で確認できていない）は planned を立てる。
+    //      画面はこれを見て「予定」と断る。false でない限り立てない（未記載の表は従来どおり確定扱い）。
+    planned: table.enacted === false,
+    table: { id: table.id, label: table.label, appliesFrom: table.applies_from, appliesThrough: table.applies_through, enacted: table.enacted !== false },
     kubun,
     annual,
     rows,
@@ -373,9 +391,8 @@ export function calcKogaku(input, data) {
       supportedThrough: data.supported_through,
       message:
         `この計算機が持っている自己負担限度額の表は${sy}年${Number(sm)}月診療分までです。` +
-        "令和9年8月診療分からは、70歳未満の所得区分が5段階から13段階に細分化され" +
-        "（標準報酬月額 44万〜50万円は 110,400円＋1％、36万〜41万円は 98,100円＋1％ など）、" +
-        "いまの区分の切り方では答えられません。近い数字をお出しすることはせず、計算を止めています。" +
+        "それより後の限度額は、まだ公表された表で確かめられていません。" +
+        "近い期間の表で代用した数字をお出しすることはせず、計算を止めています。" +
         "加入先の健康保険（協会けんぽの「高額療養費について」など）でご確認ください。",
     };
   }
@@ -439,7 +456,10 @@ export function calcKogaku(input, data) {
   return {
     supported: true,
     determined: true,
-    table: { id: table.id, label: table.label, appliesFrom: table.applies_from, appliesThrough: table.applies_through },
+    // 10b. enacted === false の表（＝公表されただけで政令で確認できていない）は planned を立てる。
+    //      画面はこれを見て「予定」と断る。false でない限り立てない（未記載の表は従来どおり確定扱い）。
+    planned: table.enacted === false,
+    table: { id: table.id, label: table.label, appliesFrom: table.applies_from, appliesThrough: table.applies_through, enacted: table.enacted !== false },
     annual,
     kubun,
     rows,
