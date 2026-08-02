@@ -31,6 +31,7 @@ export * as kabe from "./src/kabe_core.js";
 export * as kihonteate from "./src/kihonteate_core.js";
 export * as kogaku from "./src/kogaku_core.js";
 export * as kokuho from "./src/kokuho_core.js";
+export * as kokunenMenjo from "./src/kokunen_menjo_core.js";
 export * as koteiShisanzei from "./src/kotei_shisanzei_core.js";
 export * as nenkin from "./src/nenkin_core.js";
 export * as payday from "./src/payday_core.js";
@@ -77,6 +78,7 @@ export const data = {
   "kihonteate_r07": load("kihonteate_r07.json"),
   "kogaku_r08": load("kogaku_r08.json"),
   "kokuho_r08": load("kokuho_r08.json"),
+  "kokunen_menjo_r08": load("kokunen_menjo_r08.json"),
   "nenkin_r08": load("nenkin_r08.json"),
   "saitei_chingin_r07": load("saitei_chingin_r07.json"),
   "seizen_zoyo_r08": load("seizen_zoyo_r08.json"),
