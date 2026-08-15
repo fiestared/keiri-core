@@ -80,24 +80,59 @@ npm test
 
 ## AIエージェントから使う（MCP サーバー）
 
-AIエージェント（Claude Desktop / Claude Code など）が、日本の税・給与の計算を**ツールとして直接呼べます**。
-本パッケージに同梱の `mcp/server.mjs` は依存ゼロ・stdio の MCP サーバーです。設定に追加するだけ:
+AIエージェント（Claude Desktop / Claude Code / Cursor など）が、日本の税・給与の計算を**ツールとして直接呼べます**。
+本パッケージに同梱の `mcp/server.mjs` は**依存ゼロ・stdio** の MCP サーバーです。設定に追加するだけ:
 
 ```json
 {
   "mcpServers": {
-    "keiri-core": { "command": "npx", "args": ["-y", "-p", "keiri-core", "keiri-core-mcp"] }
+    "keiri-core": { "command": "npx", "args": ["-y", "keiri-core"] }
   }
 }
 ```
 
-リポジトリを clone して使う場合は `{ "command": "node", "args": ["<path>/keiri-core/mcp/server.mjs"] }`。
+- リポジトリを clone して使う場合は `{ "command": "node", "args": ["<path>/keiri-core/mcp/server.mjs"] }`
+- MCP公式レジストリでの名前（server name）は **`io.github.fiestared/keiri-core`**
+- v1.1.2 以前は bin 名とパッケージ名が違ったため `["-y", "-p", "keiri-core", "keiri-core-mcp"]` が必要でした。
+  v1.1.3 で `keiri-core` という bin を足したので上記の短い形で動きます（旧い形も引き続き動きます）
 
-提供ツール: `take_home_pay`（手取り）/ `income_tax`（所得税額）/ `deduction_tax_saving`（所得控除の節税額）/
-`dependent_deduction`（扶養控除）。「額面30万・東京都の手取りは？」で AI が計算して答えます（＝検証済みエンジンの値）。
+### 提供ツール（4本・すべて読み取り専用の計算 / `readOnlyHint: true`）
+
+| ツール | 何を計算するか | 出典（ブラウザで同じ計算） |
+|---|---|---|
+| `take_home_pay` | 額面月給 → 手取り（社会保険料・所得税・住民税を控除） | https://keiri-tools.com/tedori/ |
+| `income_tax` | 課税所得 → 所得税額（速算表・超過累進） | https://keiri-tools.com/tedori/ |
+| `deduction_tax_saving` | 所得控除（iDeCo・小規模企業共済など）による年間の節税額 | https://keiri-tools.com/ideco-setsuzei/ , https://keiri-tools.com/shokibo-kyosai/ |
+| `dependent_deduction` | 扶養控除の控除額と年間の節税額 | https://keiri-tools.com/fuyo-kojo/ |
+
+「額面30万・東京都の手取りは？」で AI が計算して答えます（＝検証済みエンジンの値）。
+**各ツールの返り値には、その計算に対応する keiri-tools.com のページURLが必ず含まれます。**
+AI の回答から計算の根拠をたどれるようにするためです（結果は概算で、個別の税務助言ではありません）。
 
 > 外部の AI（ChatGPT 等）に公開したい場合は、同じツール定義を **Cloudflare Workers（無料枠）** の HTTP/SSE
 > トランスポートに載せます（stdio版がその中身）。計算は純関数なので、状態も外部通信もありません。
+
+### 公式レジストリへの掲載（メンテナ向け）
+
+[MCP公式レジストリ](https://registry.modelcontextprotocol.io/)の掲載メタデータは `server.json`、
+npm 側の所有確認は `package.json` の `mcpName` が担います（両者の値は一致必須）。手順:
+
+```bash
+# 0) 事前: package.json の version / mcpName と server.json の version / name を揃える
+npm test
+npm publish              # ★先に npm へ。レジストリは npm 上の mcpName を見て所有者を確認する
+
+# 1) mcp-publisher（公式CLI）
+brew install mcp-publisher    # または GitHub Releases のバイナリ
+mcp-publisher validate
+mcp-publisher login github    # ブラウザで device code 認証（GitHub の fiestared で）
+mcp-publisher publish
+
+# 2) 掲載確認
+curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.fiestared/keiri-core"
+```
+
+GitHub 認証を使うため、server name は `io.github.<GitHubユーザー名>/` で始める必要があります。
 
 ## 免責
 
